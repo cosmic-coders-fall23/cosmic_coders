@@ -1,6 +1,6 @@
 # Cosmic Code: Web-Based Invader Game
 <details>
-<summary>## Table of Contents</summary>
+<summary>Table of Contents</summary>
 Introduction
 Target Audience
 Problem Statement
