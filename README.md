@@ -60,13 +60,12 @@ While there are existing invader games, few offer a multi-player experience, var
 
 ## Installation
 Follow these steps to get Cosmic Code up and running locally:
-
-\`\`\`
+```
 git clone https://github.com/CosmicCode/Cosmic-Code.git
 cd Cosmic-Code
 npm install
 npm start
-\`\`\`
+```
 
 Visit \`http://localhost:3000\` in your web browser.
 
