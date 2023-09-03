@@ -57,11 +57,12 @@ While there are existing invader games, few offer a multi-player experience, var
 - Various Power-Ups
 
 ---
-
+_TODO: Decide if this is how we want to run this_
+_This is a way to do it without needing a webpage:_
 ## Installation
 Follow these steps to get Cosmic Code up and running locally:
 ```
-git clone https://github.com/CosmicCode/Cosmic-Code.git
+git clone [https://github.com/cosmic_coders.git](https://github.com/ramirez-justin/cosmic_coders)
 cd Cosmic-Code
 npm install
 npm start
@@ -72,22 +73,25 @@ Visit \`http://localhost:3000\` in your web browser.
 ---
 
 ## How to Play
+_TODO: Create this page_
 Instructions will be displayed in-game, and you can also find detailed guidelines [here](INSTRUCTION.md).
 
 ---
 
 ## Contribution
+_TODO: Create this page_
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on how you can contribute to the project.
 
 ---
 
 ## Team
-- [Naomi King]
+_TODO: Add everyones github
+- [Naomi King]()
 - [Justin Ramirez](https://github.com/ramirez-justin)
-Shantanu Bhatawadekar
-Samuel Famakinwa
-Ja'Shon Carlisle
-
+- [Shantanu Bhatawadekar]()
+- [Samuel Famakinwa]()
+- [Ja'Shon Carlisle]()
+_TODO: Create this page_
 For more details, see the [team page](TEAM.md).
 
 ---
