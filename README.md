@@ -83,7 +83,6 @@ Instructions will be displayed in-game, and you can also find detailed guideline
 ---
 
 ## Contribution
-_TODO: Create this page_
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on how you can contribute to the project.
 
 ---
