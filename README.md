@@ -30,6 +30,10 @@ Cosmic Code is a modern take on the classic invader game genre, accessible throu
 ## Problem Statement
 While there are existing invader games, few offer a multi-player experience, varied difficulty levels, or real-time leaderboards. Cosmic Code aims to fill this gap and provide an exciting, modernized version of the game that is easily accessible through web browsers.
 
+Our game is not just a recreation; it's an enhancement. We are embedding unique features like special power-ups and an intriguing storyline. These features are not only designed to increase engagement but also to offer a sense of freshness to the classic gameplay. With top-level objectives focused on user-friendliness, engagement, and scalability, our aim is to deliver a game that's not only fun but also showcases the potency of modern web development techniques. These objectives are well-supported by key differentiators such as mobile compatibility and potential expansions like multiplayer or community-driven features.
+
+However, our ambition doesn't stop at merely crafting an engaging game. We recognize the importance of user data, progression tracking, and game management. Hence, we plan to incorporate both client and admin login systems. The client login will empower users with capabilities like progress saving, and competitive leaderboards. Simultaneously, the admin interface will grant us oversight for game moderation, comprehensive user management, and in-depth analytics – ensuring the game environment remains safe, fair, and continually improved.
+
 ---
 
 ## Top-Level Objectives
