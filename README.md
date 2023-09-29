@@ -85,15 +85,14 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on how you can contri
 ---
 
 ## Team
-_TODO: Add everyones github_
-- [Naomi King]()
+_TODO: NEED SHANTANU GITHUB_
+- [Naomi King](https://github.com/9Nking)
 - [Justin Ramirez](https://github.com/ramirez-justin)
 - [Shantanu Bhatawadekar]()
-- [Samuel Famakinwa]()
-- [Ja'Shon Carlisle]()
+- [Samuel Famakinwa](https://github.com/Saibabi)
+- [Ja'Shon Carlisle](https://github.com/jashon-carlisle)
 
 _TODO: Create this page_
-
 For more details, see the [team page](TEAM.md).
 
 ---
