@@ -91,7 +91,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on how you can contri
 _TODO: NEED SHANTANU GITHUB_
 - [Naomi King](https://github.com/9Nking)
 - [Justin Ramirez](https://github.com/ramirez-justin)
-- [Shantanu Bhatawadekar]()
+- [Shantanu Bhatawadekar](https://github.com/sbhat8)
 - [Samuel Famakinwa](https://github.com/Saibabi)
 - [Ja'Shon Carlisle](https://github.com/jashon-carlisle)
 
