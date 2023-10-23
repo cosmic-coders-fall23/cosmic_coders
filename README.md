@@ -77,8 +77,7 @@ Visit \`http://localhost:3000\` in your web browser.
 ---
 
 ## How to Play
-_TODO: Create this page_
-Instructions will be displayed in-game, and you can also find detailed guidelines [here](INSTRUCTION.md).
+[Gameplay Instructions](INSTRUCTION.md).
 
 ---
 
