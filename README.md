@@ -49,6 +49,9 @@ However, our ambition doesn't stop at merely crafting an engaging game. We recog
 - CSS3
 - JavaScript
 - Node.js
+- Kaboom.js
+- Next.js
+- React
 - Socket.io for real-time updates
 
 ---
@@ -68,8 +71,8 @@ Follow these steps to get Cosmic Code up and running locally:
 ```
 git clone [https://github.com/cosmic_coders.git](https://github.com/ramirez-justin/cosmic_coders)
 cd Cosmic-Code
-npm install
-npm start
+npm i
+npm run dev
 ```
 
 Visit \`http://localhost:3000\` in your web browser.
