@@ -37,7 +37,7 @@ function CustomNavbar() {
                     <Link href="/login">Login</Link>
                 </NavbarItem>
                 <NavbarItem>
-                    <Button as={Link} color="primary" href="#" variant="flat">
+                    <Button as={Link} color="primary" href="/signup" variant="flat">
                         Sign Up
                     </Button>
                 </NavbarItem>
