@@ -13,7 +13,7 @@ function CustomNavbar() {
     return (
         <Navbar>
             <NavbarBrand>
-                <p className="font-bold text-inherit">LOGO</p>
+                <p className="font-bold text-inherit">COSMIC CODERS</p>
             </NavbarBrand>
             <NavbarContent className="hidden sm:flex gap-4" justify="center">
                 <NavbarItem>
@@ -22,13 +22,8 @@ function CustomNavbar() {
                     </Link>
                 </NavbarItem>
                 <NavbarItem>
-                    <Link color="foreground" href="#">
-                        NavLink
-                    </Link>
-                </NavbarItem>
-                <NavbarItem>
-                    <Link color="foreground" href="#">
-                        NavLink
+                    <Link color="foreground" href="/game">
+                        Game
                     </Link>
                 </NavbarItem>
             </NavbarContent>
