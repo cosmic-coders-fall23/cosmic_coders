@@ -1,7 +1,8 @@
-"use client";
-import { Card } from "@nextui-org/card";
-import { Input } from "@nextui-org/input";
-import { Button } from "@nextui-org/button";
+'use client';
+
+import { Card } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
 import { useForm } from "react-hook-form";
 
 type FormData = {
@@ -13,18 +14,31 @@ type FormData = {
 function SignUpPage() {
   const {
     register,
-    setValue,
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit = handleSubmit((data) => {
-    fetch("/api/signup", {
-        method: 'POST',
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      const response = await fetch("/api/signup", {
+        method: 'POST', // changed from 'GET' to 'POST'
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data)
-    }).then(response => {
-        console.log(response);
-    })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.message === "User created successfully.") {
+        alert("Signup successful!");
+      } else {
+        alert(result.message || "Signup failed.");
+      }
+    } catch (error) {
+      console.error("There was an error signing up:", error);
+      alert("There was an error signing up. Please try again.");
+    }
   });
 
   return (
@@ -38,6 +52,8 @@ function SignUpPage() {
             label="Email"
             placeholder="Enter your email"
           />
+          {errors.email && <span className="text-red-500 text-sm block">Please enter a valid email.</span>}
+
           <Input
             {...register("username", {
               required: true,
@@ -47,6 +63,8 @@ function SignUpPage() {
             label="Username"
             placeholder="Enter your username"
           />
+          {errors.username && <span className="text-red-500 text-sm block">Username must be between 3 to 10 characters.</span>}
+
           <Input
             {...register("password", {
               required: true,
@@ -57,7 +75,9 @@ function SignUpPage() {
             label="Password"
             placeholder="Enter your password"
           />
-          <Button type="submit" className="w-full bg-blue-700">
+          {errors.password && <span className="text-red-500 text-sm block">Password must be between 8 to 24 characters.</span>}
+
+          <Button type="submit" block className="mt-4">
             Sign Up
           </Button>
         </form>
