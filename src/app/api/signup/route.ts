@@ -3,7 +3,7 @@ import User from "@/models/user";
 import { NextResponse } from "next/server";
 import bcrypt from 'bcrypt';
 
-export async function POST(request) {
+export async function POST(request: { json: () => PromiseLike<{ email: any; username: any; password: any; }> | { email: any; username: any; password: any; }; }) {
   await connectDB();
 
   try {
