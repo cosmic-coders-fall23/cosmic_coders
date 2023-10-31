@@ -6,10 +6,10 @@ import { Button } from "@nextui-org/react";
 import { useForm } from "react-hook-form";
 
 type FormData = {
-    email: string;
-    username: string;
-    password: string;
-}
+  email: string;
+  username: string;
+  password: string;
+};
 
 function SignUpPage() {
   const {
@@ -21,7 +21,7 @@ function SignUpPage() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const response = await fetch("/api/signup", {
-        method: 'POST', // changed from 'GET' to 'POST'
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -41,16 +41,26 @@ function SignUpPage() {
     }
   });
 
+  const backgroundImageUrl =
+    "https://preview.redd.it/lqw1dpdwv7hb1.jpg?width=640&crop=smart&auto=webp&s=7c386c659f48ead0ed7ddd6d7f6e4f192bc0d728";
+
   return (
-    <div className="h-screen flex items-center justify-center p-5">
+    <div
+      className="h-screen flex items-center justify-center p-5"
+      style={{
+        backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundSize: "cover",
+      }}
+    >
       <Card className="w-96 p-8">
-        <h1 className="text-4xl text-center font-extrabold mb-4">Sign Up</h1>
-        <form onSubmit={onSubmit} className="flex w-full flex-wrap gap-4">
+        <h1 className="text-4xl text-center font-extrabold text-white mb-4">Sign Up</h1>
+        <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <Input
             {...register("email", { required: true, pattern: /^\S+@\S+$/i })}
             type="email"
             label="Email"
-            placeholder="Enter your email"
+            placeholder="✉️ Enter your email"
+            className="cool-input"
           />
           {errors.email && <span className="text-red-500 text-sm block">Please enter a valid email.</span>}
 
@@ -61,7 +71,8 @@ function SignUpPage() {
               maxLength: 10,
             })}
             label="Username"
-            placeholder="Enter your username"
+            placeholder="👤 Enter your username"
+            className="cool-input"
           />
           {errors.username && <span className="text-red-500 text-sm block">Username must be between 3 to 10 characters.</span>}
 
@@ -73,11 +84,12 @@ function SignUpPage() {
             })}
             type="password"
             label="Password"
-            placeholder="Enter your password"
+            placeholder="🔒 Enter your password"
+            className="cool-input"
           />
           {errors.password && <span className="text-red-500 text-sm block">Password must be between 8 to 24 characters.</span>}
 
-          <Button type="submit" block className="mt-4">
+          <Button type="submit" className="bg-space-theme text-white hover:bg-space-theme-dark">
             Sign Up
           </Button>
         </form>

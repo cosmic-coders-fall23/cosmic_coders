@@ -4,41 +4,40 @@ import {
     NavbarBrand,
     NavbarContent,
     NavbarItem,
-} from "@nextui-org/react";
-import {Link} from "@nextui-org/link";
-import {Button} from "@nextui-org/button";
-
-function CustomNavbar() {
-
+  } from "@nextui-org/react";
+  import { Link } from "@nextui-org/link";
+  import { Button } from "@nextui-org/button";
+  
+  function CustomNavbar() {
     return (
-        <Navbar>
+      <Navbar className="space-navbar">
+        <NavbarContent className="space-invaders-container">
+          <NavbarBrand>
+            <Link color="foreground" href="/">
+              Home
+            </Link>
+          </NavbarBrand>
+          <NavbarBrand>
+            <Link color="foreground" href="/game">
+              Game
+            </Link>
+          </NavbarBrand>
+          <NavbarContent justify="end">
             <NavbarBrand>
-                <p className="font-bold text-inherit">COSMIC CODERS</p>
+              <Link href="/login" className="cool-link">
+                Login
+              </Link>
             </NavbarBrand>
-            <NavbarContent className="hidden sm:flex gap-4" justify="center">
-                <NavbarItem>
-                    <Link color="foreground" href="/">
-                        Home
-                    </Link>
-                </NavbarItem>
-                <NavbarItem>
-                    <Link color="foreground" href="/game">
-                        Game
-                    </Link>
-                </NavbarItem>
-            </NavbarContent>
-            <NavbarContent justify="end">
-                <NavbarItem className="hidden lg:flex">
-                    <Link href="/login">Login</Link>
-                </NavbarItem>
-                <NavbarItem>
-                    <Button as={Link} color="primary" href="/signup" variant="flat">
-                        Sign Up
-                    </Button>
-                </NavbarItem>
-            </NavbarContent>
-        </Navbar>
-    )
-}
-
-export default CustomNavbar;
+            <NavbarBrand>
+              <Button as={Link} color="primary" href="/signup" variant="flat" className="cool-button">
+                Sign Up
+              </Button>
+            </NavbarBrand>
+          </NavbarContent>
+        </NavbarContent>
+      </Navbar>
+    );
+  }
+  
+  export default CustomNavbar;
+  
