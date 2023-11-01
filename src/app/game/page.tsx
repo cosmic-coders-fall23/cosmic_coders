@@ -17,7 +17,7 @@ const Game: React.FC = () => {
             debug: true,
         })
 
-        k.loadSprite("spaceship", "sprites/spaceship.png")
+        k.loadSprite("spaceship", "sprites/starship.png")
 
         const player = k.add([
             k.sprite("spaceship"),
