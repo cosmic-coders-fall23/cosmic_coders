@@ -51,8 +51,9 @@ const Game: React.FC = () => {
     function shoot() {
       k.add([
         k.sprite("bullet"),
-        k.pos(player.pos.add(-55, -155)),
+        k.pos(player.pos.add(26, -10)),
         k.area(),
+        k.scale(0.1),
         k.move(k.UP, bulletSpeed),
         "bullet",
       ]);
