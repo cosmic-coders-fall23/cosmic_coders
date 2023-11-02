@@ -11,7 +11,7 @@ const Game: React.FC = () => {
       canvas: canvasRef.current as any,
       background: [0, 0, 20],
       width: 800,
-      height: 600,
+      height: 700,
       scale: 1,
       debug: true,
     });
@@ -24,27 +24,27 @@ const Game: React.FC = () => {
     // Define the player
     const player = k.add([
       k.sprite("spaceship"),
-      k.pos(350, 500),
+      k.pos(350, 600),
       k.scale(0.5),
       k.area(),
       k.body(),
     ]);
 
-    const moveScale = 100;
+    const moveSpeed = 200;
     const bulletSpeed = 400;
 
     // Player controls
     k.onKeyDown("left", () => {
-      player.move(k.vec2(-1, 0).scale(moveScale));
+      player.move(-moveSpeed, 0);
     });
     k.onKeyDown("right", () => {
-      player.move(k.vec2(1, 0).scale(moveScale));
+      player.move(moveSpeed, 0);
     });
     k.onKeyDown("up", () => {
-      player.move(k.vec2(0, -1).scale(moveScale));
+      player.move(0, -moveSpeed);
     });
     k.onKeyDown("down", () => {
-      player.move(k.vec2(0, 1).scale(moveScale));
+      player.move(0, moveSpeed);
     });
 
     // Function to spawn bullets
@@ -96,16 +96,23 @@ const Game: React.FC = () => {
     });
 
     // Check for collisions between the player and enemies
-    k.onCollide("enemy", "spaceship", (enemy: any) => { 
+    k.onCollide("spaceship", "enemy", (enemy) => {
       // End the game or reduce player's life
       k.destroy(enemy);
-      // You can put game over logic or life deduction logic here
+      // Game over logic here
     });
 
-    // Remove enemies when they go out of the game bounds
-    // k.action("enemy", (enemy: any) => {
+    // // When an enemy goes off-screen, destroy it
+    // k.on("update", "enemy", (enemy) => {
     //   if (enemy.pos.y > k.height()) {
     //     k.destroy(enemy);
+    //   }
+    // });
+    //
+    // // When a bullet goes off-screen, destroy it
+    // k.on("update", "bullet", (bullet) => {
+    //   if (bullet.pos.y < 0) {
+    //     k.destroy(bullet);
     //   }
     // });
 
