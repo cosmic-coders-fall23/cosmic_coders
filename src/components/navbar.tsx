@@ -1,56 +1,44 @@
 "use client";
 import {
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
+    Navbar,
+    NavbarBrand,
+    NavbarContent,
+    NavbarItem,
 } from "@nextui-org/react";
-import { Link } from "@nextui-org/link";
-import { Avatar } from "@nextui-org/react";
-import { signIn, signOut, useSession } from "next-auth/react";
-
-function AuthButton() {
-  const { data: session } = useSession();
-
-  if (session) {
-    return (
-      <>
-        {session?.user?.image && session.user?.name && <Avatar src={session.user.image} /> }
-        <button color="foreground" onClick={() => signOut()}>
-          Sign Out
-        </button>
-      </>
-    );
-  }
-  return (
-    <>
-      <button color="foreground"onClick={() => signIn()}>
-        Sign In
-      </button>
-    </>
-  );
-}
+import {Link} from "@nextui-org/link";
+import {Button} from "@nextui-org/button";
 
 function CustomNavbar() {
 
     return (
-      <Navbar className="space-navbar">
-        <NavbarContent className="space-invaders-container">
+        <Navbar>
             <NavbarBrand>
-                <Link color="foreground" href="/">
-                    Home
-                </Link>
+                <p className="font-bold text-inherit">COSMIC CODERS</p>
             </NavbarBrand>
-            <NavbarBrand>
-                <Link color="foreground" href="/game">
-                  Game
-                </Link>
-            </NavbarBrand>
-            <div>
-              <AuthButton />
-            </div>
-        </NavbarContent>
-      </Navbar>
-    );
-  }
+            <NavbarContent className="hidden sm:flex gap-4" justify="center">
+                <NavbarItem>
+                    <Link color="foreground" href="/">
+                        Home
+                    </Link>
+                </NavbarItem>
+                <NavbarItem>
+                    <Link color="foreground" href="/game">
+                        Game
+                    </Link>
+                </NavbarItem>
+            </NavbarContent>
+            <NavbarContent justify="end">
+                <NavbarItem className="hidden lg:flex">
+                    <Link href="/login">Login</Link>
+                </NavbarItem>
+                <NavbarItem>
+                    <Button as={Link} color="primary" href="/signup" variant="flat">
+                        Sign Up
+                    </Button>
+                </NavbarItem>
+            </NavbarContent>
+        </Navbar>
+    )
+}
 
 export default CustomNavbar;
