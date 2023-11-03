@@ -9,7 +9,7 @@ const Game: React.FC = () => {
     const k = kaboom({
       global: true,
       canvas: canvasRef.current as any,
-      background: [0, 0, 20],
+      background: [0, 0, 25],
       width: 800,
       height: 700,
       scale: 1,
@@ -19,11 +19,23 @@ const Game: React.FC = () => {
     // Initialize score
     let score = 0;
 
+    // Initialize lives
+    let lives = 3;
+
+    let lastShootTime = k.time();
+    let pause = false;
+
     // You may want to display the score on the screen. For that, you can add a text object:
     const scoreText = k.add([
       k.text(`Score: ${score}`),
       k.pos(10, 10), // You can change the position according to your need
       { value: 'scoreText' }, // An identifier for easy access if needed later
+    ]);
+
+    // Display lives on screen
+    const livesText = k.add([
+      k.text(`Lives: ${lives}`),
+      k.pos(600, 10), // Position below the score for visibility
     ]);
 
     // Function to update the score
@@ -44,6 +56,7 @@ const Game: React.FC = () => {
       k.scale(0.5),
       k.area(),
       k.body(),
+      "spaceship",
     ]);
 
     player.onUpdate(() => {
@@ -54,10 +67,11 @@ const Game: React.FC = () => {
     // Constrain the ship's position within the game dimensions
     player.pos.x = Math.max(0, Math.min(player.pos.x, gameWidth-(player.width*.5)));
     player.pos.y = Math.max(0, Math.min(player.pos.y, gameHeight-(player.height*.5)));
-});
+    });
 
     const moveSpeed = 200;
     const bulletSpeed = 400;
+    const GUN_COOLDOWN_TIME = 0.5;
 
     // Player controls
     k.onKeyDown("left", () => {
@@ -85,29 +99,56 @@ const Game: React.FC = () => {
       ]);
     }
 
-    // Shooting with spacebar
+    function gameOver() {
+        k.destroyAll("bullet")
+        k.destroyAll("enemy")
+        k.destroyAll("spaceship")
+        // Display game over text
+        k.add([
+          k.text("GAME OVER", { size: 40, font: "sink" }),
+          k.pos(250, 300)
+        ]);
+        k.add([
+          k.text("press enter to restart", { size: 20, font: "sink" }),
+          k.pos(295, 350)
+        ]);
+        // Optionally, after a delay, offer to restart the game or go back to a main menu
+        k.onKeyPress("enter", () => {                
+            window.location.reload();
+        });
+    }
+
     k.onKeyPress("space", () => {
-      shoot();
+      if (pause) return;
+      if (k.time() - lastShootTime > GUN_COOLDOWN_TIME) {
+        lastShootTime = k.time();
+         shoot();
+      }
     });
 
     // Define enemy behavior
     function spawnEnemy() {
-      k.add([
+    // Assuming alien width is about 1/10th of the screen width, adjust as necessary
+    const alienWidth = k.width() * 0.1;
+    const minX = alienWidth / 2; // Minimum x-position
+    const maxX = k.width() - alienWidth / 2; // Maximum x-position
+
+    k.add([
         k.sprite("alien"),
         k.scale(0.3),
-        k.pos(k.rand(0, k.width()), -30),
+        k.pos(k.rand(minX, maxX), -30),
         k.area(),
         k.body(),
         k.move(k.DOWN, 120),
         "enemy",
-      ]);
+    ]);
     }
 
     // Check collision of bullet with enemy
     k.onCollide("bullet", "enemy", (bullet, enemy) => {
       k.destroy(bullet);
       k.destroy(enemy);
-      updateScore(10); // Add 10 points for each enemy destroyed
+      updateScore(100); // Add 10 points for each enemy destroyed
     });
 
     // Spawn an enemy every 2 seconds
@@ -122,11 +163,62 @@ const Game: React.FC = () => {
       }
     });
 
-    // Check for collisions between the player and enemies
-    k.onCollide("spaceship", "enemy", (enemy) => {
-      // End the game or reduce player's life
-      k.destroy(enemy);
-      // Game over logic here
+    // Function to spawn alien bullets as small red circles
+    function spawnAlienBullet(alien: any) {
+    const bulletStartPos = alien.pos.add(alien.width * 0.15, alien.height * 0.3);
+      k.add([
+        k.circle(4), // small circle with a radius of 4
+        k.color(255, 0, 0), // red color
+        k.pos(bulletStartPos), // start from the middle-bottom of the alien
+        k.area(),
+        k.move(k.DOWN, 200), // adjust the speed as needed
+        "alienBullet",
+    ]);
+    }
+
+    // Logic to make a random alien shoot
+    k.loop(1, () => {
+      // Find all enemies currently on screen
+      const enemies = k.get("enemy");
+
+      // If there are any enemies, choose a random one to shoot
+      if (enemies.length > 0) {
+        const shooter = k.choose(enemies);
+        if (shooter) {
+        spawnAlienBullet(shooter);
+        }
+    }
+    });
+
+    // Collision detection for alien bullets and the player's spaceship
+    k.onCollide("spaceship", "alienBullet", (player, bullet) => {
+    k.destroy(bullet);
+    lives -= 1;
+    livesText.text = `Lives: ${lives}`;
+
+    if (lives <= 0) {
+        k.destroy(player);
+        gameOver(); // Call the game over function
+    }
+    });
+
+    // When an alien bullet goes off-screen, destroy it
+    k.onUpdate("alienBullet", (bullet) => {
+            if (bullet.pos.y > k.height()) {
+            k.destroy(bullet);
+            }
+            });
+
+    // Collision logic with enemy ships
+    k.onCollide("spaceship", "enemy", (player, enemy) => {
+    k.destroy(enemy);
+    lives -= 1;
+    livesText.text = `Lives: ${lives}`;
+
+    if (lives <= 0) {
+        k.destroy(player);
+        gameOver(); // Call the game over function
+    }
     });
 
     // When an enemy goes off-screen at the bottom, respawn it at the top
@@ -153,7 +245,7 @@ const Game: React.FC = () => {
 []);
 
   return (
-    <div className="h-screen flex items-center justify-center p-5">
+    <div className="h-auto flex items-center justify-center p-5">
       <div>
         <canvas ref={canvasRef}></canvas>
       </div>
