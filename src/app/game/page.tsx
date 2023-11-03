@@ -26,6 +26,10 @@ const Game: React.FC = () => {
     let lastShootTime = k.time();
     let pause = false;
 
+    const moveSpeed = 200;
+    const bulletSpeed = 400;
+    const GUN_COOLDOWN_TIME = 0.5;
+
     // load a font from a .ttf file
     k.loadFont("PixelEmulator", "fonts/PixelEmulator.ttf")
 
@@ -48,6 +52,22 @@ const Game: React.FC = () => {
       scoreText.text = `Score: ${score}`;
     }
 
+    // Function to generate stars
+    function generateStars(numberOfStars: any) {
+      for (let i = 0; i < numberOfStars; i++) {
+        const x = Math.random() * k.width();
+        const y = Math.random() * k.height();
+        k.add([
+          k.rect(2, 2), // small rectangle to represent a star; adjust size as needed
+          k.pos(x, y),
+          k.color(k.rgb(255, 255, 255)), // white color for the star
+        ]);
+      }
+    }
+
+    // Call the function with the desired number of stars
+    generateStars(150); // Adjust the number of stars as needed
+
     // Load the sprites
     k.loadSprite("spaceship", "sprites/starship.png");
     k.loadSprite("alien", "sprites/alien.png"); // Assuming this is already available in your sprites folder
@@ -63,19 +83,16 @@ const Game: React.FC = () => {
       "spaceship",
     ]);
 
+    // Keep the player within the game boundaries
     player.onUpdate(() => {
-    // Get game dimensions
-    const gameWidth = k.width();
-    const gameHeight = k.height();
+      // Get game dimensions
+      const gameWidth = k.width();
+      const gameHeight = k.height();
 
-    // Constrain the ship's position within the game dimensions
-    player.pos.x = Math.max(0, Math.min(player.pos.x, gameWidth-(player.width*.5)));
-    player.pos.y = Math.max(0, Math.min(player.pos.y, gameHeight-(player.height*.5)));
+      // Constrain the ship's position within the game dimensions
+      player.pos.x = Math.max(0, Math.min(player.pos.x, gameWidth-(player.width*.5)));
+      player.pos.y = Math.max(0, Math.min(player.pos.y, gameHeight-(player.height*.5)));
     });
-
-    const moveSpeed = 200;
-    const bulletSpeed = 400;
-    const GUN_COOLDOWN_TIME = 0.5;
 
     // Player controls
     k.onKeyDown("left", () => {
@@ -103,6 +120,7 @@ const Game: React.FC = () => {
       ]);
     }
 
+    // Function to display game over text
     function gameOver() {
         k.destroyAll("bullet")
         k.destroyAll("enemy")
@@ -122,6 +140,7 @@ const Game: React.FC = () => {
         });
     }
 
+    // Define player shooting
     k.onKeyPress("space", () => {
       if (pause) return;
       if (k.time() - lastShootTime > GUN_COOLDOWN_TIME) {
@@ -132,12 +151,12 @@ const Game: React.FC = () => {
 
     // Define enemy behavior
     function spawnEnemy() {
-    // Assuming alien width is about 1/10th of the screen width, adjust as necessary
-    const alienWidth = k.width() * 0.1;
-    const minX = alienWidth / 2; // Minimum x-position
-    const maxX = k.width() - alienWidth / 2; // Maximum x-position
+      // Assuming alien width is about 1/10th of the screen width, adjust as necessary
+      const alienWidth = k.width() * 0.1;
+      const minX = alienWidth / 2; // Minimum x-position
+      const maxX = k.width() - alienWidth / 2; // Maximum x-position
 
-    k.add([
+      k.add([
         k.sprite("alien"),
         k.scale(0.3),
         k.pos(k.rand(minX, maxX), -30),
@@ -145,7 +164,7 @@ const Game: React.FC = () => {
         k.body(),
         k.move(k.DOWN, 120),
         "enemy",
-    ]);
+      ]);
     }
 
     // Check collision of bullet with enemy
@@ -180,6 +199,19 @@ const Game: React.FC = () => {
     ]);
     }
 
+    // Flicker function to make the player's spaceship blink
+    function flicker(player: any) {
+      const numFlickers = 10;
+      const flickerDuration = 0.1;
+
+      for (let i = 0; i < numFlickers; i++) {
+        // Alternate between invisible and visible
+        k.wait(i * flickerDuration * 2, () => player.hidden = !player.hidden);
+      }
+      // Make sure the spaceship is visible after the last flicker
+      k.wait(numFlickers * flickerDuration * 2, () => player.hidden = false);
+    }
+
     // Logic to make a random alien shoot
     k.loop(1, () => {
       // Find all enemies currently on screen
@@ -194,35 +226,41 @@ const Game: React.FC = () => {
     }
     });
 
-    // Collision detection for alien bullets and the player's spaceship
-    k.onCollide("spaceship", "alienBullet", (player, bullet) => {
-    k.destroy(bullet);
-    lives -= 1;
-    livesText.text = `Lives: ${lives}`;
-
-    if (lives <= 0) {
-        k.destroy(player);
-        gameOver(); // Call the game over function
-    }
-    });
-
     // When an alien bullet goes off-screen, destroy it
     k.onUpdate("alienBullet", (bullet) => {
-            if (bullet.pos.y > k.height()) {
-            k.destroy(bullet);
-            }
-            });
+      if (bullet.pos.y > k.height()) {
+        k.destroy(bullet);
+      }
+    });
+
+    // Collision detection for alien bullets and the player's spaceship
+    k.onCollide("spaceship", "alienBullet", (player, bullet) => {
+      k.destroy(bullet);
+      lives -= 1;
+      livesText.text = `Lives: ${lives}`;
+
+      if (lives <= 0) {
+        k.destroy(player);
+        gameOver(); // Call the game over function
+      } else {
+        // Implement flicker effect
+        flicker(player);
+      }
+    });
 
     // Collision logic with enemy ships
     k.onCollide("spaceship", "enemy", (player, enemy) => {
-    k.destroy(enemy);
-    lives -= 1;
-    livesText.text = `Lives: ${lives}`;
+      k.destroy(enemy);
+      lives -= 1;
+      livesText.text = `Lives: ${lives}`;
 
-    if (lives <= 0) {
+      if (lives <= 0) {
         k.destroy(player);
         gameOver(); // Call the game over function
-    }
+      } else {
+        // Implement flicker effect
+        flicker(player);
+      }
     });
 
     // When an enemy goes off-screen at the bottom, respawn it at the top
