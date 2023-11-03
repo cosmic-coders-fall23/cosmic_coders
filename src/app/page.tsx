@@ -1,10 +1,10 @@
-import {Button} from "@nextui-org/button";
-
+//ap/page.tsx
+import Link from 'next/link'; // Import the Link component
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-
+    <main className="flex-grow flex flex-col items-center justify-center p-8 bg-gray-900 space-y-8 overflow-hidden">
+      <img src="/cosmiccoderslogo.png" alt="Logo" className="w-auto h-auto" />
     </main>
-  )
+  );
 }

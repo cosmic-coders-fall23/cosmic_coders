@@ -1,29 +1,26 @@
+//app/layout.tsx
 import './globals.css'
-import type {Metadata} from 'next'
-import {Inter} from 'next/font/google'
-import {Providers} from "@/app/Providers";
+import type {Metadata} from 'next';
+import {Inter} from 'next/font/google';
+import Providers from "@/app/Providers";
 import CustomNavbar from "@/components/navbar";
+import { getServerSession } from "next-auth";
 
-const inter = Inter({subsets: ['latin']})
-
-export const metadata: Metadata = {
-    title: 'Cosmic Coders',
-    description: 'Website for Cosmic Coders.',
-}
-
-export default function RootLayout({
-                                       children,
-                                   }: {
-    children: React.ReactNode
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
 }) {
-    return (
-        <html lang="en" className='dark'>
-        <body>
-        <Providers>
+  const session = await getServerSession();
+
+  return (
+    <html lang="en" className='dark'>
+      <body>
+        <Providers session={session}>
             <CustomNavbar />
             {children}
         </Providers>
-        </body>
-        </html>
-    )
+      </body>
+    </html>
+  )
 }
