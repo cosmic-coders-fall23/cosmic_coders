@@ -5,7 +5,7 @@ import {
   NavbarContent,
 } from "@nextui-org/react";
 import { Link } from "@nextui-org/link";
-import {Avatar} from "@nextui-org/react";
+import { Avatar } from "@nextui-org/react";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 function AuthButton() {
@@ -14,7 +14,7 @@ function AuthButton() {
   if (session) {
     return (
       <>
-        {session.user?.image && session.user?.name && <Avatar src={session.user.image} /> }
+        {session?.user?.image && session.user?.name && <Avatar src={session.user.image} /> }
         <button color="foreground" onClick={() => signOut()}>
           Sign Out
         </button>
@@ -48,7 +48,6 @@ function CustomNavbar() {
             <div>
               <AuthButton />
             </div>
-
         </NavbarContent>
       </Navbar>
     );

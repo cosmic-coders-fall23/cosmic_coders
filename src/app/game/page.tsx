@@ -16,6 +16,22 @@ const Game: React.FC = () => {
       debug: true,
     });
 
+    // Initialize score
+    let score = 0;
+
+    // You may want to display the score on the screen. For that, you can add a text object:
+    const scoreText = k.add([
+      k.text(`Score: ${score}`),
+      k.pos(10, 10), // You can change the position according to your need
+      { value: 'scoreText' }, // An identifier for easy access if needed later
+    ]);
+
+    // Function to update the score
+    function updateScore(value: any) {
+      score += value;
+      scoreText.text = `Score: ${score}`;
+    }
+
     // Load the sprites
     k.loadSprite("spaceship", "sprites/starship.png");
     k.loadSprite("alien", "sprites/alien.png"); // Assuming this is already available in your sprites folder
@@ -29,6 +45,16 @@ const Game: React.FC = () => {
       k.area(),
       k.body(),
     ]);
+
+    player.onUpdate(() => {
+    // Get game dimensions
+    const gameWidth = k.width();
+    const gameHeight = k.height();
+
+    // Constrain the ship's position within the game dimensions
+    player.pos.x = Math.max(0, Math.min(player.pos.x, gameWidth-(player.width*.5)));
+    player.pos.y = Math.max(0, Math.min(player.pos.y, gameHeight-(player.height*.5)));
+});
 
     const moveSpeed = 200;
     const bulletSpeed = 400;
@@ -78,9 +104,10 @@ const Game: React.FC = () => {
     }
 
     // Check collision of bullet with enemy
-    k.onCollide("bullet", "enemy", (bullet: any, enemy: any) => {
+    k.onCollide("bullet", "enemy", (bullet, enemy) => {
       k.destroy(bullet);
       k.destroy(enemy);
+      updateScore(10); // Add 10 points for each enemy destroyed
     });
 
     // Spawn an enemy every 2 seconds
@@ -88,8 +115,8 @@ const Game: React.FC = () => {
       spawnEnemy();
     });
 
-    // Define an action for all bullets to check for out of bounds
-    k.onCollide("bullet", "enemy", (bullet: any) => {
+    // When a bullet goes off-screen, destroy it
+    k.onUpdate("bullet", (bullet) => {
       if (bullet.pos.y < 0) {
         k.destroy(bullet);
       }
@@ -102,21 +129,28 @@ const Game: React.FC = () => {
       // Game over logic here
     });
 
-    // // When an enemy goes off-screen, destroy it
-    // k.on("update", "enemy", (enemy) => {
-    //   if (enemy.pos.y > k.height()) {
-    //     k.destroy(enemy);
-    //   }
-    // });
-    //
-    // // When a bullet goes off-screen, destroy it
-    // k.on("update", "bullet", (bullet) => {
-    //   if (bullet.pos.y < 0) {
-    //     k.destroy(bullet);
-    //   }
-    // });
+    // When an enemy goes off-screen at the bottom, respawn it at the top
+    k.onUpdate("enemy", (enemy) => {
+      if (enemy.pos.y > k.height()) {
+        // Reset the enemy position to the top of the screen
+        // You may want to randomize the x position if needed
+        enemy.pos.y = -enemy.height;
+        enemy.pos.x = k.rand(0, k.width() - enemy.width); // This assumes you want a random x position within the screen width
+      }
+    });
 
-  }, []);
+    // When a bullet goes off-screen, destroy it
+    k.onUpdate("bullet", (bullet) => {
+      if (bullet.pos.y < 0) {
+        k.destroy(bullet);
+      }
+    });
+
+ 
+
+
+  },
+[]);
 
   return (
     <div className="h-screen flex items-center justify-center p-5">
