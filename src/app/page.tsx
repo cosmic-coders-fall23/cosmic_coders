@@ -1,10 +1,29 @@
 //ap/page.tsx
-import Link from 'next/link'; // Import the Link component
+'use client'
+import React, { useEffect } from 'react';
 
-export default function Home() {
+const Home: React.FC = () => {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+
+    // Load and draw the logo image on the canvas
+    const logo = new Image();
+    logo.src = "/cosmiccoderslogo.png";
+    logo.onload = () => {
+      if (context && canvas) {
+        context.drawImage(logo, (canvas.width - logo.width)/2, (canvas.height - logo.height)/2);
+      }
+    }
+  }, []);
+
   return (
-    <main className="flex-grow flex flex-col items-center justify-center p-8 bg-gray-900 space-y-8 overflow-hidden">
-      <img src="/cosmiccoderslogo.png" alt="Logo" className="w-auto h-auto" />
-    </main>
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-900">
+      <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight} />
+    </div>
   );
 }
+
+export default Home;

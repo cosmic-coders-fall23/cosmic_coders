@@ -17,12 +17,10 @@ const Game: React.FC = () => {
       debug: true,
     });
 
-    // Initialize score
+    // Initialize basic game variables
     let score = 0;
-
-    // Initialize lives
     let lives = 3;
-
+    let level = 1;
     let lastShootTime = k.time();
     let pause = false;
 
@@ -279,10 +277,6 @@ const Game: React.FC = () => {
         k.destroy(bullet);
       }
     });
-
- 
-
-
   },
 []);
 
