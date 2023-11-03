@@ -1,21 +1,33 @@
 // app/Providers.tsx
 'use client'
-import { ReactNode } from 'react';
-import { SessionProvider } from "next-auth/react";
+import { ReactNode, useEffect, useState } from 'react';
 import { NextUIProvider } from '@nextui-org/react';
+import { UserContext } from '@/components/usercontext';
 
 interface ProvidersProps {
   children: ReactNode;
-  session: any; // You can type this based on your session object
 }
 
-function Providers({ children, session }: ProvidersProps) {
+function Providers({ children }: ProvidersProps) {
+  const [user, setUser] = useState({
+    username: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      const userParsed = JSON.parse(user);
+      setUser(userParsed);
+    }
+  }, []);
+
   return (
-    <NextUIProvider>
-      <SessionProvider session={session}>
+    <UserContext.Provider value={{user, setUser}}>
+      <NextUIProvider>
         {children}
-      </SessionProvider>
-    </NextUIProvider>
+      </NextUIProvider>
+    </UserContext.Provider>
   );
 }
 
