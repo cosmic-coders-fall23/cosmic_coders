@@ -2,6 +2,7 @@
 import kaboom from "kaboom";
 import * as React from "react";
 
+
 const Game: React.FC = () => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
@@ -25,17 +26,20 @@ const Game: React.FC = () => {
     let lastShootTime = k.time();
     let pause = false;
 
+    // load a font from a .ttf file
+    k.loadFont("PixelEmulator", "fonts/PixelEmulator.ttf")
+
     // You may want to display the score on the screen. For that, you can add a text object:
     const scoreText = k.add([
-      k.text(`Score: ${score}`),
+      k.text(`Score: ${score}`, {font: "PixelEmulator"}),
       k.pos(10, 10), // You can change the position according to your need
       { value: 'scoreText' }, // An identifier for easy access if needed later
     ]);
 
     // Display lives on screen
     const livesText = k.add([
-      k.text(`Lives: ${lives}`),
-      k.pos(600, 10), // Position below the score for visibility
+      k.text(`Lives: ${lives}`, {font: "PixelEmulator"}),
+      k.pos(610, 10), // Position below the score for visibility
     ]);
 
     // Function to update the score
@@ -105,12 +109,12 @@ const Game: React.FC = () => {
         k.destroyAll("spaceship")
         // Display game over text
         k.add([
-          k.text("GAME OVER", { size: 40, font: "sink" }),
-          k.pos(250, 300)
+          k.text("GAME OVER", { size: 55, font: "PixelEmulator" }),
+          k.pos(235, 300)
         ]);
         k.add([
-          k.text("press enter to restart", { size: 20, font: "sink" }),
-          k.pos(295, 350)
+          k.text("press enter to restart", { size: 20, font: "PixelEmulator" }),
+          k.pos(260, 355)
         ]);
         // Optionally, after a delay, offer to restart the game or go back to a main menu
         k.onKeyPress("enter", () => {                

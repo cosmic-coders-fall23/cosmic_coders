@@ -1,6 +1,7 @@
 import { Card } from "@nextui-org/card";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
+import PropTypes from "prop-types"; // Import PropTypes for prop validation
 
 function StoryPage() {
   const backgroundImageUrl =
@@ -21,16 +22,7 @@ function StoryPage() {
         imageRendering: "pixelated", // Add this line for image rendering
       }}
     >
-      <Card className="w-96 p-8">
-        <h1 className="text-4xl text-center font-extrabold text-white mb-4">Log In</h1>
-        <div className="flex w-full flex-wrap gap-4">
-          <Input type="email" label="Email" placeholder="✉️ Enter your email" className="cool-input" />
-          <Input type="password" label="Password" placeholder="🔒 Enter your password" className="cool-input" />
-          <Button className="bg-space-theme text-white hover:bg-space-theme-dark w-full">
-            Log In
-          </Button>
-        </div>
-      </Card>
+
     </div>
   );
 };
