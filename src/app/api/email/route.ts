@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     try {
         const data = await resend.emails.send({
-            from: 'Cosmic Coders <verify@modernpint.com>',
+            from: 'Cosmic Coders <verify@cosmiccoders.space>',
             to: [email],
             subject: 'Verify your email',
             react: VerifyEmail({ username: username, link: link }),
