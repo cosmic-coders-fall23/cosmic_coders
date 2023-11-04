@@ -30,15 +30,22 @@ const Game: React.FC = () => {
     const bulletSpeed = 400;
     const GUN_COOLDOWN_TIME = 0.5;
 
+    // -----------------------------Environment stuff---------------------------------------
     // load a font from a .ttf file
     k.loadFont("PixelEmulator", "fonts/PixelEmulator.ttf")
 
-    // You may want to display the score on the screen. For that, you can add a text object:
+    // Display the score on the screen
     const scoreText = k.add([
       k.text(`Score: ${score}`, {font: "PixelEmulator"}),
       k.pos(10, 10), // You can change the position according to your need
       { value: 'scoreText' }, // An identifier for easy access if needed later
     ]);
+
+    // Function to update the score
+    function updateScore(value: number) {
+      score += value;
+      scoreText.text = `Score: ${score}`;
+    }
 
     // Display lives on screen
     const livesText = k.add([
@@ -46,14 +53,8 @@ const Game: React.FC = () => {
       k.pos(610, 10), // Position below the score for visibility
     ]);
 
-    // Function to update the score
-    function updateScore(value: any) {
-      score += value;
-      scoreText.text = `Score: ${score}`;
-    }
-
     // Function to generate stars
-    function generateStars(numberOfStars: any) {
+    function generateStars(numberOfStars: number) {
       for (let i = 0; i < numberOfStars; i++) {
         const x = Math.random() * k.width();
         const y = Math.random() * k.height();
@@ -65,69 +66,8 @@ const Game: React.FC = () => {
       }
     }
 
-    function shootSpecial() {
-      // Center bullet
-      k.add([
-        k.sprite("bullet"),
-        k.pos(player.pos.add(26, -10)),
-        k.area(),
-        k.scale(0.1),
-        k.move(k.UP, bulletSpeed),
-        "bullet",
-      ]);
-
-      // Left bullet
-      k.add([
-        k.sprite("bullet"),
-        k.pos(player.pos.add(0, 0)),
-        k.area(),
-        k.scale(0.1),
-        k.move(k.vec2(-1, -1).unit(), bulletSpeed), // Move up and to the left
-        "bullet",
-      ]);
-
-      // Right bullet
-      k.add([
-        k.sprite("bullet"),
-        k.pos(player.pos.add(52, 0)), // Adjust X offset to match spaceship width
-        k.area(),
-        k.scale(0.1),
-        k.move(k.vec2(1, -1).unit(), bulletSpeed), // Move up and to the right
-        "bullet",
-      ]);
-    }
-
-    function giveSpecialShoot(player: any) {
-      if (specialShootActive) {
-        clearTimeout(specialShootTimeout); // Reset the timer if power-up is picked up again
-      } else {
-        specialShootActive = true;
-        // Modify the player's shoot function or behavior
-        player.shoot = shootSpecial;
-      }
-
-      // Set a timeout for the special shoot duration, say 10 seconds
-      specialShootTimeout = setTimeout(() => {
-        specialShootActive = false;
-        player.shoot = shoot; // Revert back to the normal shoot function
-      }, 10000);
-    }
-
-    // Update your shoot function to check for the special shoot
-    k.onKeyPress("space", () => {
-      if (pause) return;
-      if (k.time() - lastShootTime > GUN_COOLDOWN_TIME) {
-        lastShootTime = k.time();
-        if (specialShootActive) {
-          shootSpecial();
-        } else {
-          shoot();
-        }
-      }
-    });
-
     // Call the function with the desired number of stars
-    generateStars(150); // Adjust the number of stars as needed
+    generateStars(200); // Adjust the number of stars as needed
 
     // Load the sprites
     k.loadSprite("spaceship", "sprites/starship.png");
@@ -135,6 +75,7 @@ const Game: React.FC = () => {
     k.loadSprite("bullet", "sprites/laserBullet.png");
     k.loadSprite("powerUp", "sprites/powerUp.png");
 
+    // ------------------------------------Player stuff------------------------------------------------
     // Define the player
     const player = k.add([
       k.sprite("spaceship"),
@@ -170,6 +111,46 @@ const Game: React.FC = () => {
       player.move(0, moveSpeed);
     });
 
+
+
+
+    // ------------------------------------Enemy stuff-------------------------------------------------
+    // Define enemy behavior
+    function spawnEnemy() {
+      // Assuming alien width is about 1/10th of the screen width, adjust as necessary
+      const alienWidth = k.width() * 0.1;
+      const minX = alienWidth / 2; // Minimum x-position
+      const maxX = k.width() - alienWidth / 2; // Maximum x-position
+
+      k.add([
+        k.sprite("alien"),
+        k.scale(0.3),
+        k.pos(k.rand(minX, maxX), -30),
+        k.area(),
+        k.body(),
+        k.move(k.DOWN, 120),
+        "enemy",
+      ]);
+    }
+
+    // Spawn an enemy every 2 seconds
+    k.loop(2, () => {
+      spawnEnemy();
+    });
+    // ------------------------------------Bullet/PowerUp stuff-----------------------------------------------
+    // Define player shooting
+    k.onKeyPress("space", () => {
+      if (pause) return;
+      if (k.time() - lastShootTime > GUN_COOLDOWN_TIME) {
+        lastShootTime = k.time();
+        if (specialShootActive) {
+          shootSpecial();
+        } else {
+          shoot();
+        }
+      }
+    });
+
     // Function to spawn bullets
     function shoot() {
       k.add([
@@ -181,6 +162,88 @@ const Game: React.FC = () => {
         "bullet",
       ]);
     }
+
+    // Function to shoot a special bullet
+    function shootSpecial() {
+      // Center bullet
+      k.add([
+        k.sprite("bullet"),
+        k.pos(player.pos.add(26, -10)),
+        k.area(),
+        k.scale(0.1),
+        k.move(k.UP, bulletSpeed),
+        "bullet",
+      ]);
+
+      // Left bullet
+      k.add([
+        k.sprite("bullet"),
+        k.pos(player.pos.add(0, 0)),
+        k.area(),
+        k.scale(0.1),
+        k.move(k.vec2(-1, -1).unit(), bulletSpeed), // Move up and to the left
+        "bullet",
+      ]);
+
+      // Right bullet
+      k.add([
+        k.sprite("bullet"),
+        k.pos(player.pos.add(52, 0)), // Adjust X offset to match spaceship width
+        k.area(),
+        k.scale(0.1),
+        k.move(k.vec2(1, -1).unit(), bulletSpeed), // Move up and to the right
+        "bullet",
+      ]);
+    }
+
+    // Function to create power-ups
+    function createPowerUp() {
+      const x = k.rand(0, k.width());
+      const y = -30; // Start above the screen
+      k.add([
+        k.sprite("powerUp"), // Assuming you have a sprite for the power-up
+        k.pos(x, y),
+        k.area(),
+        k.move(k.DOWN, 100), // Move downwards
+        "powerUp", // This tag is used for collision detection
+      ]);
+    }
+
+    // Function to give the player a special shoot
+    function giveSpecialShoot(player: any) {
+        if (specialShootActive) {
+        clearTimeout(specialShootTimeout); // Reset the timer if power-up is picked up again
+        } else {
+        specialShootActive = true;
+        // Modify the player's shoot function or behavior
+        player.shoot = shootSpecial;
+        }
+
+        // Set a timeout for the special shoot duration, say 10 seconds
+        specialShootTimeout = setTimeout(() => {
+        specialShootActive = false;
+        player.shoot = shoot; // Revert back to the normal shoot function
+        }, 10000) as unknown as number;
+    }
+
+    // ------------------------------------Collision stuff----------------------------------------------
+    // Collision between spaceship and power-up
+    k.onCollide("spaceship", "powerUp", (player, power) => {
+      k.destroy(power); // This destroys the power-up
+      giveSpecialShoot(player); // This grants the special shooting ability to the player
+    });
+
+    // Check collision of bullet with enemy
+    k.onCollide("bullet", "enemy", (bullet, enemy) => {
+      k.destroy(bullet);
+      k.destroy(enemy);
+      updateScore(100); // Add 10 points for each enemy destroyed
+    });
+
+    // ------------------------------------Game stuff---------------------------------------------------
+
+
+
 
     // Function to display game over text
     function gameOver() {
@@ -202,59 +265,17 @@ const Game: React.FC = () => {
         });
     }
 
-    // Function to create power-ups
-    function createPowerUp() {
-      const x = k.rand(0, k.width());
-      const y = -30; // Start above the screen
-      k.add([
-        k.rect(20, 20), // Simple square shape for now
-        k.pos(x, y),
-        k.color(255, 255, 0), // Yellow color
-        k.move(k.DOWN, 100), // Move downwards
-        "powerUp",
-      ]);
-    }
 
-    // Define player shooting
-    k.onKeyPress("space", () => {
-      if (pause) return;
-      if (k.time() - lastShootTime > GUN_COOLDOWN_TIME) {
-        lastShootTime = k.time();
-         shoot();
-      }
-    });
 
-    // Define enemy behavior
-    function spawnEnemy() {
-      // Assuming alien width is about 1/10th of the screen width, adjust as necessary
-      const alienWidth = k.width() * 0.1;
-      const minX = alienWidth / 2; // Minimum x-position
-      const maxX = k.width() - alienWidth / 2; // Maximum x-position
 
-      k.add([
-        k.sprite("alien"),
-        k.scale(0.3),
-        k.pos(k.rand(minX, maxX), -30),
-        k.area(),
-        k.body(),
-        k.move(k.DOWN, 120),
-        "enemy",
-      ]);
-    }
 
-    // Check collision of bullet with enemy
-    k.onCollide("bullet", "enemy", (bullet, enemy) => {
-      k.destroy(bullet);
-      k.destroy(enemy);
-      updateScore(100); // Add 10 points for each enemy destroyed
-    });
 
-    // Spawn an enemy every 2 seconds
-    k.loop(2, () => {
-      spawnEnemy();
-    });
 
-    // Spawn a power-up every 30 seconds (for example)
+
+
+
+
+    // Spawn a power-up after 15 seconds 
     k.wait(15, () => {
       createPowerUp();
     });
