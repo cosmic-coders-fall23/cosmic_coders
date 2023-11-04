@@ -23,6 +23,8 @@ const Game: React.FC = () => {
     let level = 1;
     let lastShootTime = k.time();
     let pause = false;
+    let specialShootActive = false;
+    let specialShootTimeout = 10;
 
     const moveSpeed = 200;
     const bulletSpeed = 400;
@@ -63,6 +65,67 @@ const Game: React.FC = () => {
       }
     }
 
+    function shootSpecial() {
+      // Center bullet
+      k.add([
+        k.sprite("bullet"),
+        k.pos(player.pos.add(26, -10)),
+        k.area(),
+        k.scale(0.1),
+        k.move(k.UP, bulletSpeed),
+        "bullet",
+      ]);
+
+      // Left bullet
+      k.add([
+        k.sprite("bullet"),
+        k.pos(player.pos.add(0, 0)),
+        k.area(),
+        k.scale(0.1),
+        k.move(k.vec2(-1, -1).unit(), bulletSpeed), // Move up and to the left
+        "bullet",
+      ]);
+
+      // Right bullet
+      k.add([
+        k.sprite("bullet"),
+        k.pos(player.pos.add(52, 0)), // Adjust X offset to match spaceship width
+        k.area(),
+        k.scale(0.1),
+        k.move(k.vec2(1, -1).unit(), bulletSpeed), // Move up and to the right
+        "bullet",
+      ]);
+    }
+
+    function giveSpecialShoot(player: any) {
+      if (specialShootActive) {
+        clearTimeout(specialShootTimeout); // Reset the timer if power-up is picked up again
+      } else {
+        specialShootActive = true;
+        // Modify the player's shoot function or behavior
+        player.shoot = shootSpecial;
+      }
+
+      // Set a timeout for the special shoot duration, say 10 seconds
+      specialShootTimeout = setTimeout(() => {
+        specialShootActive = false;
+        player.shoot = shoot; // Revert back to the normal shoot function
+      }, 10000);
+    }
+
+    // Update your shoot function to check for the special shoot
+    k.onKeyPress("space", () => {
+      if (pause) return;
+      if (k.time() - lastShootTime > GUN_COOLDOWN_TIME) {
+        lastShootTime = k.time();
+        if (specialShootActive) {
+          shootSpecial();
+        } else {
+          shoot();
+        }
+      }
+    });
+
     // Call the function with the desired number of stars
     generateStars(150); // Adjust the number of stars as needed
 
@@ -70,6 +133,7 @@ const Game: React.FC = () => {
     k.loadSprite("spaceship", "sprites/starship.png");
     k.loadSprite("alien", "sprites/alien.png"); // Assuming this is already available in your sprites folder
     k.loadSprite("bullet", "sprites/laserBullet.png");
+    k.loadSprite("powerUp", "sprites/powerUp.png");
 
     // Define the player
     const player = k.add([
@@ -138,6 +202,19 @@ const Game: React.FC = () => {
         });
     }
 
+    // Function to create power-ups
+    function createPowerUp() {
+      const x = k.rand(0, k.width());
+      const y = -30; // Start above the screen
+      k.add([
+        k.rect(20, 20), // Simple square shape for now
+        k.pos(x, y),
+        k.color(255, 255, 0), // Yellow color
+        k.move(k.DOWN, 100), // Move downwards
+        "powerUp",
+      ]);
+    }
+
     // Define player shooting
     k.onKeyPress("space", () => {
       if (pause) return;
@@ -175,6 +252,11 @@ const Game: React.FC = () => {
     // Spawn an enemy every 2 seconds
     k.loop(2, () => {
       spawnEnemy();
+    });
+
+    // Spawn a power-up every 30 seconds (for example)
+    k.wait(15, () => {
+      createPowerUp();
     });
 
     // When a bullet goes off-screen, destroy it
@@ -259,6 +341,12 @@ const Game: React.FC = () => {
         // Implement flicker effect
         flicker(player);
       }
+    });
+
+    // Collision between spaceship and power-up
+    k.onCollide("spaceship", "powerUp", (player, power) => {
+      k.destroy(power);
+      giveSpecialShoot(player);
     });
 
     // When an enemy goes off-screen at the bottom, respawn it at the top
