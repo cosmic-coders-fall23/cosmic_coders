@@ -1,43 +1,12 @@
-"use client";
-import React from "react";
+"use client"
 import kaboom from "kaboom";
-import {useState, useEffect, useRef, useContext} from "react";
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
-import {UserContext} from "@/components/usercontext";
-import UserService from "@/services/userservice";
+import * as React from "react";
 
-export default function GamePage() {
-  const {user, setUser} = useContext(UserContext);
-  const [currentHighScore, setCurrentHighScore] = useState(user.score as number);
-  const [finalScore, setFinalScore] = useState(0);
-  const {isOpen, onOpen, onOpenChange} = useDisclosure();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const updateHighScore = (scored: number) => {
-    UserService.addHighScore(scored).then(response => {
-        if (response.status === 200 && response.data.message.includes("Success")) {
-          const userData = {
-            username: user.username,
-            email: user.email,
-            score: scored,
-          };
-          setUser(userData);
-          localStorage.setItem("user", JSON.stringify(userData));
-          setCurrentHighScore(scored);
-        }
-    })
-  }
+const Game: React.FC = () => {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
-  const processScore = (scored: number) => {
-    setFinalScore(scored);
-    if (scored > currentHighScore && user.username !== "") {
-      onOpenChange();
-      updateHighScore(scored);
-    }
-  }
-
-  useEffect(() => {
-    console.log(user)
+  React.useEffect(() => {
     const k = kaboom({
       global: true,
       canvas: canvasRef.current as any,
@@ -48,18 +17,21 @@ export default function GamePage() {
       debug: true,
     });
 
+    const moveSpeed = 200;
+    const bulletSpeed = 400;
+    const GUN_COOLDOWN_TIME = 0.5;
+    const baseSpawnTime = 2;
+
     // Initialize basic game variables
     let score = 0;
     let lives = 3;
     let level = 1;
     let lastShootTime = k.time();
     let pause = false;
+    let spawnTime = calculateSpawnTime(level); // Get the initial spawn time
     let specialShootActive = false;
     let specialShootTimeout = 10;
 
-    const moveSpeed = 200;
-    const bulletSpeed = 400;
-    const GUN_COOLDOWN_TIME = 0.5;
 
     // -----------------------------Environment stuff---------------------------------------
     // load a font from a .ttf file
@@ -142,6 +114,19 @@ export default function GamePage() {
       player.move(0, moveSpeed);
     });
 
+    // Flicker function to make the player's spaceship blink
+    function flicker(player: any) {
+      const numFlickers = 10;
+      const flickerDuration = 0.1;
+
+      for (let i = 0; i < numFlickers; i++) {
+        // Alternate between invisible and visible
+        k.wait(i * flickerDuration * 2, () => player.hidden = !player.hidden);
+      }
+      // Make sure the spaceship is visible after the last flicker
+      k.wait(numFlickers * flickerDuration * 2, () => player.hidden = false);
+    }
+
     // ------------------------------------Enemy stuff-------------------------------------------------
     // Define enemy behavior
     function spawnEnemy() {
@@ -161,10 +146,73 @@ export default function GamePage() {
       ]);
     }
 
-    // Spawn an enemy every 2 seconds
-    k.loop(2, () => {
-      spawnEnemy();
+    // Define a function to calculate spawn time based on level
+    function calculateSpawnTime(level: number): number {
+      // Use a formula that decreases time slowly and approaches a minimum value but never reaches 0
+      // This is a logarithmic decrease. Adjust the divisor to control the rate of decrease
+      const minSpawnTime = 0.1; // the minimum spawn time you want to approach
+      const spawnTimeReduction = Math.log(level + 1) / (10 * level);
+      const newSpawnTime = Math.max(baseSpawnTime - spawnTimeReduction, minSpawnTime);
+
+      return newSpawnTime;
+    }
+
+    // Enemy spawn loop
+    function startSpawningEnemies() {
+      spawnEnemy(); // Spawn an enemy immediately
+
+      setTimeout(() => {
+        // Calculate new spawn time for next level
+        spawnTime = calculateSpawnTime(level);
+        // Spawn the next enemy after the calculated delay
+        startSpawningEnemies();
+      }, spawnTime * 1000); // Convert spawn time to milliseconds for setTimeout
+    }
+
+    // When an enemy goes off-screen at the bottom, respawn it at the top
+    k.onUpdate("enemy", (enemy) => {
+      if (enemy.pos.y > k.height()) {
+        // Reset the enemy position to the top of the screen
+        // You may want to randomize the x position if needed
+        enemy.pos.y = -enemy.height;
+        enemy.pos.x = k.rand(0, k.width() - enemy.width); // This assumes you want a random x position within the screen width
+      }
     });
+
+    // Function to spawn alien bullets as small red circles
+    function spawnAlienBullet(alien: any) {
+    const bulletStartPos = alien.pos.add(alien.width * 0.15, alien.height * 0.3);
+      k.add([
+        k.circle(4), // small circle with a radius of 4
+        k.color(255, 0, 0), // red color
+        k.pos(bulletStartPos), // start from the middle-bottom of the alien
+        k.area(),
+        k.move(k.DOWN, 200), // adjust the speed as needed
+        "alienBullet",
+      ]);
+    }
+
+    // Logic to make a random alien shoot
+    k.loop(1, () => {
+      // Find all enemies currently on screen
+      const enemies = k.get("enemy");
+
+      // If there are any enemies, choose a random one to shoot
+      if (enemies.length > 0) {
+        const shooter = k.choose(enemies);
+        if (shooter) {
+        spawnAlienBullet(shooter);
+        }
+    }
+    });
+
+    // When an alien bullet goes off-screen, destroy it
+    k.onUpdate("alienBullet", (bullet) => {
+      if (bullet.pos.y > k.height()) {
+        k.destroy(bullet);
+      }
+    });
+
     // ------------------------------------Bullet/PowerUp stuff-----------------------------------------------
     // Define player shooting
     k.onKeyPress("space", () => {
@@ -233,9 +281,17 @@ export default function GamePage() {
         k.pos(x, y),
         k.area(),
         k.move(k.DOWN, 100), // Move downwards
+        k.scale(0.1),
         "powerUp", // This tag is used for collision detection
       ]);
     }
+
+    // When a bullet goes off-screen, destroy it
+    k.onUpdate("bullet", (bullet) => {
+      if (bullet.pos.y < 0) {
+        k.destroy(bullet);
+      }
+    });
 
     // Function to give the player a special shoot
     function giveSpecialShoot(player: any) {
@@ -254,6 +310,11 @@ export default function GamePage() {
         }, 10000) as unknown as number;
     }
 
+    // Spawn a power-up after 15 seconds 
+    k.wait(15, () => {
+      createPowerUp();
+    });
+
     // ------------------------------------Collision stuff----------------------------------------------
     // Collision between spaceship and power-up
     k.onCollide("spaceship", "powerUp", (player, power) => {
@@ -266,89 +327,6 @@ export default function GamePage() {
       k.destroy(bullet);
       k.destroy(enemy);
       updateScore(100); // Add 10 points for each enemy destroyed
-    });
-
-    // ------------------------------------Game stuff---------------------------------------------------
-
-    // Function to display game over text
-    function gameOver() {
-      k.destroyAll("bullet")
-      k.destroyAll("enemy")
-      k.destroyAll("spaceship")
-      // Display game over text
-      k.add([
-        k.text("GAME OVER", { size: 55, font: "PixelEmulator" }),
-        k.pos(235, 300)
-      ]);
-      k.add([
-        k.text("press enter to restart", { size: 20, font: "PixelEmulator" }),
-        k.pos(260, 355)
-      ]);
-      //check if new high score
-      processScore(score);
-      // Optionally, after a delay, offer to restart the game or go back to a main menu
-      k.onKeyPress("enter", () => {
-          window.location.reload();
-      });
-    }
-
-    // Spawn a power-up after 15 seconds
-    k.wait(15, () => {
-      createPowerUp();
-    });
-
-    // When a bullet goes off-screen, destroy it
-    k.onUpdate("bullet", (bullet) => {
-      if (bullet.pos.y < 0) {
-        k.destroy(bullet);
-      }
-    });
-
-    // Function to spawn alien bullets as small red circles
-    function spawnAlienBullet(alien: any) {
-    const bulletStartPos = alien.pos.add(alien.width * 0.15, alien.height * 0.3);
-      k.add([
-        k.circle(4), // small circle with a radius of 4
-        k.color(255, 0, 0), // red color
-        k.pos(bulletStartPos), // start from the middle-bottom of the alien
-        k.area(),
-        k.move(k.DOWN, 200), // adjust the speed as needed
-        "alienBullet",
-    ]);
-    }
-
-    // Flicker function to make the player's spaceship blink
-    function flicker(player: any) {
-      const numFlickers = 10;
-      const flickerDuration = 0.1;
-
-      for (let i = 0; i < numFlickers; i++) {
-        // Alternate between invisible and visible
-        k.wait(i * flickerDuration * 2, () => player.hidden = !player.hidden);
-      }
-      // Make sure the spaceship is visible after the last flicker
-      k.wait(numFlickers * flickerDuration * 2, () => player.hidden = false);
-    }
-
-    // Logic to make a random alien shoot
-    k.loop(1, () => {
-      // Find all enemies currently on screen
-      const enemies = k.get("enemy");
-
-      // If there are any enemies, choose a random one to shoot
-      if (enemies.length > 0) {
-        const shooter = k.choose(enemies);
-        if (shooter) {
-        spawnAlienBullet(shooter);
-        }
-    }
-    });
-
-    // When an alien bullet goes off-screen, destroy it
-    k.onUpdate("alienBullet", (bullet) => {
-      if (bullet.pos.y > k.height()) {
-        k.destroy(bullet);
-      }
     });
 
     // Collision detection for alien bullets and the player's spaceship
@@ -381,59 +359,92 @@ export default function GamePage() {
       }
     });
 
-    // Collision between spaceship and power-up
-    k.onCollide("spaceship", "powerUp", (player, power) => {
-      k.destroy(power);
-      giveSpecialShoot(player);
-    });
+    // ------------------------------------Game stuff---------------------------------------------------
+    // Function to start a level
+    function startLevel() {
+      // Reset or increase difficulty as needed
+      // Here, you would include any logic that needs to run at the start of each leve
+      startSpawningEnemies();
 
-    // When an enemy goes off-screen at the bottom, respawn it at the top
-    k.onUpdate("enemy", (enemy) => {
-      if (enemy.pos.y > k.height()) {
-        // Reset the enemy position to the top of the screen
-        // You may want to randomize the x position if needed
-        enemy.pos.y = -enemy.height;
-        enemy.pos.x = k.rand(0, k.width() - enemy.width); // This assumes you want a random x position within the screen width
-      }
-    });
+    }
 
-    // When a bullet goes off-screen, destroy it
-    k.onUpdate("bullet", (bullet) => {
-      if (bullet.pos.y < 0) {
-        k.destroy(bullet);
+    // Function to end a level
+    function endLevel() {
+      // Check conditions for ending the level
+      // For example, player still has lives, didn't reach a game over, etc.
+      if (lives > 0) {
+        // Increase the level number
+        level += 1;
+
+        // Here you could display a message saying the level is complete
+        // and set up a few seconds delay before starting the next level
+
+        k.add([
+          k.text(`Level ${level} Complete!`, { size: 24, font: "PixelEmulator" }),
+          k.pos(235, 300),
+        ]);
+
+        // Wait a couple of seconds before starting the next level
+        k.wait(2, () => {
+          // Start the next level
+          startLevel();
+        });
       }
-    });
-  },
-[]);
+    }
+
+    // ... (rest of your game setup)
+
+    // Start the first level
+    startLevel();
+
+    // Function to display game over text
+    function gameOver() {
+      // Destroy all game objects to clean up the game world
+      k.destroyAll("bullet");
+      k.destroyAll("enemy");
+      k.destroyAll("spaceship");
+      k.destroyAll("alienBullet");
+      k.destroyAll("powerUp");
+      // Display game over text
+      const gameOverText = k.add([
+        k.text("GAME OVER", { size: 55, font: "PixelEmulator" }),
+        k.pos(235, 300),
+      ]);
+
+      const restartText = k.add([
+        k.text("Press Enter to Restart", { size: 20, font: "PixelEmulator" }),
+        k.pos(260, 355),
+      ]);
+      // Wait for the player to press enter to restart the game
+      k.onKeyPress("enter", () => {
+        // Reset game stats
+        score = 0;
+        lives = 3;
+        level = 1;
+
+        // Clear the game over text
+        k.destroy(gameOverText);
+        k.destroy(restartText);
+
+        // Reset the score and lives text
+        scoreText.text = `Score: ${score}`;
+        livesText.text = `Lives: ${lives}`;
+
+        // Restart the game
+        startLevel();
+      });
+    }
+
+  }, []);
 
   return (
     <div className="h-auto flex items-center justify-center p-5">
-
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">New high score!</ModalHeader>
-              <ModalBody>
-                <p>
-                  Congratulations! You just got a new high score:
-                </p>
-                <p className="text-center font-bold text-5xl">
-                  {finalScore}
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
       <div>
         <canvas ref={canvasRef}></canvas>
       </div>
     </div>
   );
 };
+
+export default Game;
+
