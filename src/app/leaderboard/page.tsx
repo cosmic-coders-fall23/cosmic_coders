@@ -51,14 +51,6 @@ function LeaderboardPage() {
                                 <TableCell>{value.score}</TableCell>
                             </TableRow>
                         ))}
-
-                        {loading && Array.apply(null, { length: 10 }).map((value: LeaderboardScore, index: number) => (
-                            <TableRow key={index}>
-                                <TableCell><Skeleton>loading</Skeleton></TableCell>
-                                <TableCell><Skeleton>loading</Skeleton></TableCell>
-                                <TableCell><Skeleton>loading</Skeleton></TableCell>
-                            </TableRow>
-                        ))}
                 </TableBody>
             </Table>
         </div>

@@ -9,6 +9,7 @@ interface ProvidersProps {
 
 function Providers({children}: ProvidersProps) {
     const [user, setUser] = useState(() => {
+        if (typeof window !== 'undefined') {
         const localUser = localStorage.getItem("user");
         return localUser
             ? JSON.parse(localUser)
@@ -17,6 +18,13 @@ function Providers({children}: ProvidersProps) {
                 email: "",
                 score: 0,
             };
+        } else {
+            return {
+                username: "",
+                email: "",
+                score: 0,
+            };
+        }
     });
 
     useEffect(() => {
