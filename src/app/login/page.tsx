@@ -16,7 +16,7 @@ type FormData = {
 
 function LoginPage() {
     const [loading, setLoading] = useState(false);
-    const {user, setUser} = useContext(UserContext);
+    const {setUser} = useContext(UserContext);
     const router = useRouter();
 
     const {
@@ -31,11 +31,15 @@ function LoginPage() {
         AuthService.login(data.email, data.password)
             .then(response => {
                 if (response.status === 200) {
-                    localStorage.setItem("user", JSON.stringify(response.data));
-                    setUser({
+                    const userData = {
                         username: response.data.username,
                         email: response.data.email,
-                    });
+                        score: response.data.score,
+                    };
+
+                    // Update the user context and local storage
+                    setUser(userData);
+                    localStorage.setItem("user", JSON.stringify(userData));
                     router.push("/")
                 }
             }).catch(error => {

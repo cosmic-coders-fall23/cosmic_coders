@@ -41,6 +41,11 @@ function CustomNavbar() {
                         Game
                     </Link>
                 </NavbarItem>
+                <NavbarItem>
+                    <Link color="foreground" href="/leaderboard">
+                        Leaderboard
+                    </Link>
+                </NavbarItem>
             </NavbarContent>
             
             {user.username !== "" ? (

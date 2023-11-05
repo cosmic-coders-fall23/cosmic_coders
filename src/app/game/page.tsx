@@ -1,12 +1,43 @@
-"use client"
+"use client";
+import React from "react";
 import kaboom from "kaboom";
-import * as React from "react";
+import {useState, useEffect, useRef, useContext} from "react";
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
+import {UserContext} from "@/components/usercontext";
+import UserService from "@/services/userservice";
 
+export default function GamePage() {
+  const {user, setUser} = useContext(UserContext);
+  const [currentHighScore, setCurrentHighScore] = useState(user.score as number);
+  const [finalScore, setFinalScore] = useState(0);
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-const Game: React.FC = () => {
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const updateHighScore = (scored: number) => {
+    UserService.addHighScore(scored).then(response => {
+        if (response.status === 200 && response.data.message.includes("Success")) {
+          const userData = {
+            username: user.username,
+            email: user.email,
+            score: scored,
+          };
+          setUser(userData);
+          localStorage.setItem("user", JSON.stringify(userData));
+          setCurrentHighScore(scored);
+        }
+    })
+  }
 
-  React.useEffect(() => {
+  const processScore = (scored: number) => {
+    setFinalScore(scored);
+    if (scored > currentHighScore && user.username !== "") {
+      onOpenChange();
+      updateHighScore(scored);
+    }
+  }
+
+  useEffect(() => {
+    console.log(user)
     const k = kaboom({
       global: true,
       canvas: canvasRef.current as any,
@@ -110,9 +141,6 @@ const Game: React.FC = () => {
     k.onKeyDown("down", () => {
       player.move(0, moveSpeed);
     });
-
-
-
 
     // ------------------------------------Enemy stuff-------------------------------------------------
     // Define enemy behavior
@@ -242,40 +270,29 @@ const Game: React.FC = () => {
 
     // ------------------------------------Game stuff---------------------------------------------------
 
-
-
-
     // Function to display game over text
     function gameOver() {
-        k.destroyAll("bullet")
-        k.destroyAll("enemy")
-        k.destroyAll("spaceship")
-        // Display game over text
-        k.add([
-          k.text("GAME OVER", { size: 55, font: "PixelEmulator" }),
-          k.pos(235, 300)
-        ]);
-        k.add([
-          k.text("press enter to restart", { size: 20, font: "PixelEmulator" }),
-          k.pos(260, 355)
-        ]);
-        // Optionally, after a delay, offer to restart the game or go back to a main menu
-        k.onKeyPress("enter", () => {                
-            window.location.reload();
-        });
+      k.destroyAll("bullet")
+      k.destroyAll("enemy")
+      k.destroyAll("spaceship")
+      // Display game over text
+      k.add([
+        k.text("GAME OVER", { size: 55, font: "PixelEmulator" }),
+        k.pos(235, 300)
+      ]);
+      k.add([
+        k.text("press enter to restart", { size: 20, font: "PixelEmulator" }),
+        k.pos(260, 355)
+      ]);
+      //check if new high score
+      processScore(score);
+      // Optionally, after a delay, offer to restart the game or go back to a main menu
+      k.onKeyPress("enter", () => {
+          window.location.reload();
+      });
     }
 
-
-
-
-
-
-
-
-
-
-
-    // Spawn a power-up after 15 seconds 
+    // Spawn a power-up after 15 seconds
     k.wait(15, () => {
       createPowerUp();
     });
@@ -391,12 +408,32 @@ const Game: React.FC = () => {
 
   return (
     <div className="h-auto flex items-center justify-center p-5">
+
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">New high score!</ModalHeader>
+              <ModalBody>
+                <p>
+                  Congratulations! You just got a new high score:
+                </p>
+                <p className="text-center font-bold text-5xl">
+                  {finalScore}
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
       <div>
         <canvas ref={canvasRef}></canvas>
       </div>
     </div>
   );
 };
-
-export default Game;
-
