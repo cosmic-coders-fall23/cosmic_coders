@@ -63,7 +63,7 @@ export default function GamePage() {
     let spawnTime = calculateSpawnTime(level); // Get the initial spawn time
     let specialShootActive = false;
     let specialShootTimeout = 10;
-
+    let MAX_LEVEL = 10;
 
     // -----------------------------Environment stuff---------------------------------------
     // load a font from a .ttf file
@@ -392,42 +392,52 @@ export default function GamePage() {
     });
 
     // ------------------------------------Game stuff---------------------------------------------------
+    // Start the first level
+    startLevel();
+
     // Function to start a level
     function startLevel() {
-      // Reset or increase difficulty as needed
-      // Here, you would include any logic that needs to run at the start of each leve
-      startSpawningEnemies();
-
+      if (level <= MAX_LEVEL) {
+          // Reset or increase difficulty as needed
+          resetPlayerPosition();
+          // Here, you would include any logic that needs to run at the start of each level
+          startSpawningEnemies();
+          createPowerUp();
+      //} else {
+          // Player has completed all levels
+          //gameComplete();
+      }
+      endLevel();
     }
 
     // Function to end a level
     function endLevel() {
       // Check conditions for ending the level
-      // For example, player still has lives, didn't reach a game over, etc.
-      if (lives > 0) {
-        // Increase the level number
-        level += 1;
-
-        // Here you could display a message saying the level is complete
-        // and set up a few seconds delay before starting the next level
-
-        k.add([
-          k.text(`Level ${level} Complete!`, { size: 24, font: "PixelEmulator" }),
-          k.pos(235, 300),
-        ]);
-
-        // Wait a couple of seconds before starting the next level
-        k.wait(2, () => {
-          // Start the next level
+      k.wait(30, () => {
+        if (lives > 0) {
+          k.destroyAll("bullet");
+          k.destroyAll("enemy"); 
+          k.destroyAll("alienBullet");
+          k.destroyAll("powerUp");
+          level += 1;
+          const levelCompleteText = k.add([
+            k.text(`Level ${level-1} Complete!`, { size: 24, font: "PixelEmulator" }),
+            k.pos(235, 300)
+            ]);
+          k.wait(5, () => {
+              k.destroy(levelCompleteText)
+          });
           startLevel();
-        });
-      }
+        }
+      });
     }
 
-    // ... (rest of your game setup)
+    // Player mechanics
+    function resetPlayerPosition() {
+        // Reset the player's position to the starting point
+    } 
 
-    // Start the first level
-    startLevel();
+
 
     // Function to display game over text
     function gameOver() {
