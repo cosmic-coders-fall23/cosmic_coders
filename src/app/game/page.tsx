@@ -5,15 +5,20 @@ import {useState, useEffect, useRef, useContext} from "react";
 import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
 import {UserContext} from "@/components/usercontext";
 import UserService from "@/services/userservice";
+import { storyLines } from "@/components/levelmodal";
 
 
 export default function GamePage() {
+  const [currentLevel, setCurrentLevel] = useState(1); 
   const {user, setUser} = useContext(UserContext);
   const [currentHighScore, setCurrentHighScore] = useState(user.score as number);
   const [finalScore, setFinalScore] = useState(0);
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
+  const [currentStory, setCurrentStory] = useState<StoryLines | undefined>(undefined);
+  const [isModalVisible, setIsModalVisible] = useState(true);
+  const [score, setScore] = useState(0);
+  const [Lives, setLives] = useState(3);
   const updateHighScore = (scored: number) => {
     UserService.addHighScore(scored).then(response => {
         if (response.status === 200 && response.data.message.includes("Success")) {
@@ -37,7 +42,10 @@ export default function GamePage() {
     }
   }
 
+
   useEffect(() => {
+    const story = storyLines.find(storyLine => storyLine.level === currentLevel);
+    setCurrentStory(story);
     console.log(user)
     const k = kaboom({
       global: true,
@@ -55,12 +63,9 @@ export default function GamePage() {
     const baseSpawnTime = 2;
 
     // Initialize basic game variables
-    let score = 0;
-    let lives = 3;
-    let level = 1;
     let lastShootTime = k.time();
     let pause = false;
-    let spawnTime = calculateSpawnTime(level); // Get the initial spawn time
+    let spawnTime = calculateSpawnTime(currentLevel); // Get the initial spawn time
     let specialShootActive = false;
     let specialShootTimeout = 10;
     let MAX_LEVEL = 10;
@@ -78,13 +83,13 @@ export default function GamePage() {
 
     // Function to update the score
     function updateScore(value: number) {
-      score += value;
+      setScore((currentScore) => currentScore + value);
       scoreText.text = `Score: ${score}`;
     }
 
     // Display lives on screen
     const livesText = k.add([
-      k.text(`Lives: ${lives}`, {font: "PixelEmulator"}),
+      k.text(`Lives: ${Lives}`, {font: "PixelEmulator"}),
       k.pos(610, 10), // Position below the score for visibility
     ]);
 
@@ -178,12 +183,12 @@ export default function GamePage() {
       ]);
     }
 
-    // Define a function to calculate spawn time based on level
-    function calculateSpawnTime(level: number): number {
+    // Define a function to calculate spawn time based oncurrentLevel 
+    function calculateSpawnTime(currentLevel: number): number {
       // Use a formula that decreases time slowly and approaches a minimum value but never reaches 0
       // This is a logarithmic decrease. Adjust the divisor to control the rate of decrease
       const minSpawnTime = 0.1; // the minimum spawn time you want to approach
-      const spawnTimeReduction = Math.log(level + 1) / (10 * level);
+      const spawnTimeReduction = Math.log(currentLevel + 1) / (10 * currentLevel);
       const newSpawnTime = Math.max(baseSpawnTime - spawnTimeReduction, minSpawnTime);
 
       return newSpawnTime;
@@ -194,8 +199,8 @@ export default function GamePage() {
       spawnEnemy(); // Spawn an enemy immediately
 
       setTimeout(() => {
-        // Calculate new spawn time for next level
-        spawnTime = calculateSpawnTime(level);
+        // Calculate new spawn time for nextcurrentLevel 
+        spawnTime = calculateSpawnTime(currentLevel);
         // Spawn the next enemy after the calculated delay
         startSpawningEnemies();
       }, spawnTime * 1000); // Convert spawn time to milliseconds for setTimeout
@@ -364,10 +369,10 @@ export default function GamePage() {
     // Collision detection for alien bullets and the player's spaceship
     k.onCollide("spaceship", "alienBullet", (player, bullet) => {
       k.destroy(bullet);
-      lives -= 1;
-      livesText.text = `Lives: ${lives}`;
+      setLives((currentLives) => currentLives - 1);
+      livesText.text = `Lives: ${Lives}`;
 
-      if (lives <= 0) {
+      if (Lives <= 0) {
         k.destroy(player);
         gameOver(); // Call the game over function
       } else {
@@ -379,10 +384,10 @@ export default function GamePage() {
     // Collision logic with enemy ships
     k.onCollide("spaceship", "enemy", (player, enemy) => {
       k.destroy(enemy);
-      lives -= 1;
-      livesText.text = `Lives: ${lives}`;
+      setLives((currentLives) => currentLives - 1);
+      livesText.text = `Lives: ${Lives}`;
 
-      if (lives <= 0) {
+      if (Lives <= 0) {
         k.destroy(player);
         gameOver(); // Call the game over function
       } else {
@@ -392,12 +397,17 @@ export default function GamePage() {
     });
 
     // ------------------------------------Game stuff---------------------------------------------------
-    // Start the first level
+
+
+    // Start the first currentLevel 
     startLevel();
 
     // Function to start a level
     function startLevel() {
-      if (level <= MAX_LEVEL) {
+
+      k.wait(15);
+      if (currentLevel <= MAX_LEVEL) {
+          setIsModalVisible(false);
           // Reset or increase difficulty as needed
           resetPlayerPosition();
           // Here, you would include any logic that needs to run at the start of each level
@@ -414,14 +424,14 @@ export default function GamePage() {
     function endLevel() {
       // Check conditions for ending the level
       k.wait(30, () => {
-        if (lives > 0) {
+        if (Lives > 0) {
           k.destroyAll("bullet");
           k.destroyAll("enemy"); 
           k.destroyAll("alienBullet");
           k.destroyAll("powerUp");
-          level += 1;
+          setCurrentLevel(currentLevel + 1);
           const levelCompleteText = k.add([
-            k.text(`Level ${level-1} Complete!`, { size: 24, font: "PixelEmulator" }),
+            k.text(`Level ${currentLevel-1} Complete!`, { size: 24, font: "PixelEmulator" }),
             k.pos(235, 300)
             ]);
           k.wait(5, () => {
@@ -436,7 +446,6 @@ export default function GamePage() {
     function resetPlayerPosition() {
         // Reset the player's position to the starting point
     } 
-
 
 
     // Function to display game over text
@@ -460,14 +469,22 @@ export default function GamePage() {
       //check if new high score
       processScore(score);
       // Optionally, after a delay, offer to restart the game or go back to a main menu
-      k.onKeyPress("enter", () => {
-        window.location.reload();
-        // possibly reset all variables
-        startLevel();
-      });
+      k.onKeyPress("enter", restartGame);
     }
 
-  }, []);
+    function restartGame() {
+      // Reset game state
+      setCurrentLevel(1);
+      setScore(0);
+      setLives(3)
+      // Reinitialize game objects
+      startLevel();
+    }
+
+    return () => {
+    // Cleanup code here...
+    };
+  }, [currentLevel]);
 
   return (
     <div className="h-auto flex items-center justify-center p-5">
@@ -493,6 +510,10 @@ export default function GamePage() {
           )}
         </ModalContent>
       </Modal>
+        <Modal isOpen={isModalVisible && currentStory != null} isDismissable={false}>
+          <ModalHeader>{currentStory?.title || `Level ${currentLevel}`}</ModalHeader>
+          <ModalBody>{currentStory?.body || 'No story available for this level.'}</ModalBody>
+        </Modal>
       <div>
         <canvas ref={canvasRef}></canvas>
       </div>
