@@ -16,6 +16,11 @@
   }
 }
 
+@font-face {
+    font-family: 'PixelEmulator';
+    src: url('/fonts/PixelEmulator.ttf') format('truetype'); /* Update the path as necessary */
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -26,3 +31,23 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+@keyframes textCrawl {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(-200%);
+  }
+}
+
+.crawl-text {
+  animation: textCrawl 20s linear infinite;
+  position: absolute;
+  top: 50%; /* Center vertically */
+  left: 25%; /* Center horizontally */
+  transform: translate(-50%, -100%); /* Adjust for the size of the element */
+  white-space: pre-wrap; /* Ensures text formatting is maintained */
+  overflow: hidden;
+  max-width: 800px;
+  text-align: center; /* Align text horizontally */
+}

@@ -41,9 +41,15 @@ export default function LevelModal({level, isModalVisible, setModalVisible}: Sto
     const story = storyLines.find(storyLine => storyLine.level === level);
 
     return (
-        <Modal placement="center" isOpen={isModalVisible} isDismissable={false}>
-            <ModalHeader>{story?.title || `Level ${level}`}</ModalHeader>
-            <ModalBody>{story?.body || 'No story available for this level.'}</ModalBody>
+        <Modal className="modal-container" isOpen={isModalVisible} isDismissable={false}>
+            <div className="crawl-text">
+                <ModalHeader className="font-pixel-emulator text-xl text-white">
+                    {story?.title || `Level ${level}`}
+                </ModalHeader>
+                <ModalBody className="font-pixel-emulator text-xl text-white">
+                    {story?.body || 'No story available for this level.'}
+                </ModalBody>
+            </div>
         </Modal>
-    )
+    );
 }
