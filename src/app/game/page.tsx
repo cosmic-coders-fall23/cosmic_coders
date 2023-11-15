@@ -5,7 +5,7 @@ import {useState, useEffect, useRef, useContext} from "react";
 import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
 import {UserContext} from "@/components/usercontext";
 import UserService from "@/services/userservice";
-import { storyLines } from "@/components/levelmodal";
+import LevelModal from "@/components/levelmodal";
 
 
 export default function GamePage() {
@@ -16,8 +16,6 @@ export default function GamePage() {
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isModalVisible, setIsModalVisible] = useState(true);
-  const [score, setScore] = useState(0);
-  const [Lives, setLives] = useState(3);
   const updateHighScore = (scored: number) => {
     UserService.addHighScore(scored).then(response => {
         if (response.status === 200 && response.data.message.includes("Success")) {
@@ -65,6 +63,8 @@ export default function GamePage() {
     let specialShootActive = false;
     let specialShootTimeout = 10;
     let MAX_LEVEL = 10;
+    let score = 0;
+    let lives = 3;
 
     // -----------------------------Environment stuff---------------------------------------
     // load a font from a .ttf file
@@ -79,13 +79,13 @@ export default function GamePage() {
 
     // Function to update the score
     function updateScore(value: number) {
-      setScore((currentScore) => currentScore + value);
+      score += value;
       scoreText.text = `Score: ${score}`;
     }
 
     // Display lives on screen
     const livesText = k.add([
-      k.text(`Lives: ${Lives}`, {font: "PixelEmulator"}),
+      k.text(`Lives: ${lives}`, {font: "PixelEmulator"}),
       k.pos(610, 10), // Position below the score for visibility
     ]);
 
@@ -365,10 +365,10 @@ export default function GamePage() {
     // Collision detection for alien bullets and the player's spaceship
     k.onCollide("spaceship", "alienBullet", (player, bullet) => {
       k.destroy(bullet);
-      setLives((currentLives) => currentLives - 1);
-      livesText.text = `Lives: ${Lives}`;
+      lives -= 1;
+      livesText.text = `Lives: ${lives}`;
 
-      if (Lives <= 0) {
+      if (lives <= 0) {
         k.destroy(player);
         gameOver(); // Call the game over function
       } else {
@@ -380,10 +380,10 @@ export default function GamePage() {
     // Collision logic with enemy ships
     k.onCollide("spaceship", "enemy", (player, enemy) => {
       k.destroy(enemy);
-      setLives((currentLives) => currentLives - 1);
-      livesText.text = `Lives: ${Lives}`;
+      lives -= 1;
+      livesText.text = `Lives: ${lives}`;
 
-      if (Lives <= 0) {
+      if (lives <= 0) {
         k.destroy(player);
         gameOver(); // Call the game over function
       } else {
@@ -395,92 +395,149 @@ export default function GamePage() {
     // ------------------------------------Game stuff---------------------------------------------------
 
 
-    // Start the first currentLevel 
+    // Start the first level 
     startLevel();
 
     // Function to start a level
     function startLevel() {
+      showLevelModal(); // Show level start modal
+      k.wait(15, () => {
+        if (currentLevel <= MAX_LEVEL) {
+          setupLevel(); // Setup level-specific elements
+        } else {
+          gameComplete(); // Player has completed all levels
+        }
+      k.wait(30, () => endLevel());
+      });
+    }
 
-      k.wait(15);
-      if (currentLevel <= MAX_LEVEL) {
-          setIsModalVisible(false);
-          // Reset or increase difficulty as needed
-          resetPlayerPosition();
-          // Here, you would include any logic that needs to run at the start of each level
-          startSpawningEnemies();
-          createPowerUp();
-      //} else {
-          // Player has completed all levels
-          //gameComplete();
-      }
-      endLevel();
+    // Function to setup and start a new level
+    function setupLevel() {
+      resetGameElements(); // Reset player, enemies, etc.
+      startLevelChallenges(); // Start spawning enemies, power-ups, etc.
+    }
+
+    // Function to reset game elements for a new level
+    function resetGameElements() {
+      resetPlayerPosition();
+      clearGameObjects(); // Clear bullets, enemies, etc.
+    }
+
+    // Function to start level-specific challenges
+    function startLevelChallenges() {
+      startSpawningEnemies();
+      createPowerUp();
     }
 
     // Function to end a level
     function endLevel() {
-      // Check conditions for ending the level
-      k.wait(30, () => {
-        if (Lives > 0) {
-          k.destroyAll("bullet");
-          k.destroyAll("enemy"); 
-          k.destroyAll("alienBullet");
-          k.destroyAll("powerUp");
+      if (lives > 0) {
+        displayLevelCompleteText();
+        k.wait(5, () => {
           setCurrentLevel(currentLevel + 1);
-          const levelCompleteText = k.add([
-            k.text(`Level ${currentLevel-1} Complete!`, { size: 24, font: "PixelEmulator" }),
-            k.pos(235, 300)
-            ]);
-          k.wait(5, () => {
-              k.destroy(levelCompleteText)
-          });
-          startLevel();
-        }
-      });
+          startLevel(); // Start next level
+        });
+      } else {
+        gameOver();
+      }
+    }
+
+    // Function to display level complete text
+    function displayLevelCompleteText() {
+      const levelCompleteText = createText(`Level ${currentLevel-1} Complete!`, 24, 235, 300);
+      k.wait(5, () => k.destroy(levelCompleteText));
     }
 
     // Player mechanics
     function resetPlayerPosition() {
-        // Reset the player's position to the starting point
-    } 
-
+      player.pos.x = 350;
+      player.pos.y = 600;
+    }
 
     // Function to display game over text
     function gameOver() {
-      // Destroy all game objects to clean up the game world
-      k.destroyAll("bullet");
-      k.destroyAll("enemy");
-      k.destroyAll("spaceship");
-      k.destroyAll("alienBullet");
-      k.destroyAll("powerUp");
-      // Display game over text
-      k.add([
-        k.text("GAME OVER", { size: 55, font: "PixelEmulator" }),
-        k.pos(235, 300),
-      ]);
-
-      k.add([
-        k.text("Press Enter to Restart", { size: 20, font: "PixelEmulator" }),
-        k.pos(260, 355),
-      ]);
-      //check if new high score
+      clearGameObjects();
+      displayGameOverText();
       processScore(score);
-      // Optionally, after a delay, offer to restart the game or go back to a main menu
       k.onKeyPress("enter", restartGame);
     }
 
     function restartGame() {
-      // Reset game state
-      setCurrentLevel(1);
-      setScore(0);
-      setLives(3)
-      // Reinitialize game objects
+      resetGameState();
       startLevel();
     }
 
-    return () => {
-    // Cleanup code here...
-    };
-  }, [currentLevel]);
+    function resetGameState() {
+      setCurrentLevel(1);
+      score = 0;
+      lives = 3;
+    }
+
+    // Helper Functions
+    function showLevelModal() {
+      setIsModalVisible(true);
+      k.wait(15, () => setIsModalVisible(false));
+    }
+
+    function clearGameObjects() {
+      k.destroyAll("bullet");
+      k.destroyAll("enemy");
+      k.destroyAll("alienBullet");
+      k.destroyAll("powerUp");
+    }
+
+    function displayGameOverText() {
+      k.add([
+        k.text("GAME OVER", { size: 55, font: "PixelEmulator" }),
+        k.pos(235, 300)
+      ]);
+      k.add([
+        k.text("Press Enter to Restart", { size: 20, font: "PixelEmulator" }),
+        k.pos(260, 355)
+      ]);
+    }
+
+    function createText(text: string, size: number, posX: number, posY: number) {
+      return k.add([
+        k.text(text, { size: size, font: "PixelEmulator" }),
+        k.pos(posX, posY)
+      ]);
+    }
+
+    // Function to handle game completion
+    function gameComplete() {
+      displayGameCompleteText();
+      offerRestartOrMenuOptions();
+    }
+
+    // Function to display game completion text
+    function displayGameCompleteText() {
+      k.add([
+        k.text("Congratulations! You've completed all levels!", { size: 30, font: "PixelEmulator" }),
+        k.pos(120, 250)
+      ]);
+      k.add([
+        k.text("Press Enter to Restart", { size: 20, font: "PixelEmulator" }),
+        k.pos(235, 300)
+      ]);
+      k.add([
+        k.text("Press Esc to Main Menu", { size: 20, font: "PixelEmulator" }),
+        k.pos(235, 350)
+      ]);
+    }
+
+    // Function to offer restart or return to main menu options
+    function offerRestartOrMenuOptions() {
+      k.onKeyPress("enter", restartGame);
+      // Assuming there's a function to go back to the main menu
+      k.onKeyPress("escape", goToMainMenu);
+    }
+
+    // Assume there's a function to handle going back to the main menu
+    function goToMainMenu() {
+      // Implement logic to go to the main menu
+    }
+  }, []);
 
   return (
     <div className="h-auto flex items-center justify-center p-5">
@@ -506,7 +563,7 @@ export default function GamePage() {
           )}
         </ModalContent>
       </Modal>
-
+      <LevelModal  isModalVisible={isModalVisible} level={currentLevel} setModalVisible={setIsModalVisible} /> 
       <div>
         <canvas ref={canvasRef}></canvas>
       </div>
