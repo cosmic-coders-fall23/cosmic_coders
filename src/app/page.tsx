@@ -159,7 +159,12 @@ function HomePage() {
                 >
                     Engaging Gameplay
                 </motion.h1>
-                <motion.div className="flex flex-row justify-end mt-8">
+                <motion.div
+                    className="flex flex-row justify-end mt-8"
+                    initial={{opacity: 0, x: 100}}
+                    whileInView={{opacity: 1, x: 0}}
+                    transition={{ease: "anticipate", duration: 0.6}}
+                >
                     <Image src="/videos/demo.gif" />
                 </motion.div>
             </div>
