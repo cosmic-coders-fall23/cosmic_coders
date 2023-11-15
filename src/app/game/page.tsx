@@ -67,6 +67,7 @@ export default function GamePage() {
     let score = currentScore;
     let lives = currentLives;
     let gameActive = false;
+    let isPaused = false;
 
     // -----------------------------Environment stuff---------------------------------------
     // load a font from a .ttf file
@@ -455,6 +456,7 @@ export default function GamePage() {
     }
 
     function restartGame() {
+      clearGameObjects();
       resetGameState();
       startLevel();
     }
@@ -499,7 +501,7 @@ export default function GamePage() {
     // Function to handle game completion
     function gameComplete() {
       displayGameCompleteText();
-      offerRestartOrMenuOptions();
+      k.onKeyPress("enter", restartGame); 
     }
 
     // Function to display game completion text
@@ -522,17 +524,55 @@ export default function GamePage() {
       ]);
     }
 
-    // Function to offer restart or return to main menu options
-    function offerRestartOrMenuOptions() {
-      k.onKeyPress("enter", restartGame);
-      // Assuming there's a function to go back to the main menu
-      k.onKeyPress("escape", goToMainMenu);
-    }
+    // function togglePause() {
+    //   isPaused = !isPaused;
+    //   if (isPaused) {
+    //     // Pause the game logic (e.g., stop movement, animations, etc.)
+    //     // Display the pause menu
+    //     showPauseMenu();
+    //   }
+    // }
+    //
+    // // Call this function to toggle pause state
+    // k.onKeyPress("p", togglePause); // Use a key like 'p' for pausing
+    //
+    // function showPauseMenu() {
+    //   // Pause the game's update loop or other dynamic elements
+    //   // ...
+    //
+    //   // Create and display menu elements
+    //
+    //   // Add a text element for 'Resume'
+    //   const resumeText = k.add([
+    //     k.text('Press b to Resume', { size: 24, font: "PixelEmulator" }),
+    //     k.pos(100, 100),
+    //     k.color(255, 255, 255),
+    //     { "pauseMenuText": true } // Tag for easy cleanup
+    //   ]);
+    //
+    //   // Add a text element for 'Restart'
+    //   const restartText = k.add([
+    //     k.text('Press r to Restart', { size: 24, font: "PixelEmulator" }),
+    //     k.pos(100, 150),
+    //     k.color(255, 255, 255),
+    //     { "pauseMenuText": true } // Tag for easy cleanup
+    //   ]);
+    //
+    //   // Listen for key press to resume
+    //   k.onKeyPress("b", () => {
+    //     // Remove the menu elements and resume the game
+    //     k.destroyAll("pauseMenuText");
+    //     togglePause(); // Assuming togglePause() is defined to handle the pause state
+    //   });
+    //
+    //   // Listen for key press to restart
+    //   k.onKeyPress("r", () => {
+    //     // Remove the menu elements and restart the game
+    //     k.destroyAll("pauseMenuText");
+    //     restartGame(); // Assuming restartGame() is defined to restart the game
+    //   });
+    // }
 
-    // Assume there's a function to handle going back to the main menu
-    function goToMainMenu() {
-      // Implement logic to go to the main menu
-    }
   }, [currentLevel]);
 
   return (
@@ -566,5 +606,3 @@ export default function GamePage() {
         </div>
   );
 };
-
-
