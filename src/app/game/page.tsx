@@ -63,7 +63,7 @@ export default function GamePage() {
     let spawnTime = calculateSpawnTime(currentLevel); // Get the initial spawn time
     let specialShootActive = false;
     let specialShootTimeout = 10;
-    let MAX_LEVEL = 10;
+    let MAX_LEVEL = 15;
     let score = currentScore;
     let lives = currentLives;
     let gameActive = false;
@@ -468,7 +468,7 @@ export default function GamePage() {
     // Helper Functions
     function showLevelModal() {
       setIsModalVisible(true);
-      k.wait(10, () => setIsModalVisible(false));
+      k.wait(20, () => setIsModalVisible(false));
     }
 
     function clearGameObjects() {
