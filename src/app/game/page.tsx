@@ -15,7 +15,6 @@ export default function GamePage() {
   const [finalScore, setFinalScore] = useState(0);
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [currentStory, setCurrentStory] = useState<StoryLines | undefined>(undefined);
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [score, setScore] = useState(0);
   const [Lives, setLives] = useState(3);
@@ -44,9 +43,6 @@ export default function GamePage() {
 
 
   useEffect(() => {
-    const story = storyLines.find(storyLine => storyLine.level === currentLevel);
-    setCurrentStory(story);
-    console.log(user)
     const k = kaboom({
       global: true,
       canvas: canvasRef.current as any,
@@ -510,10 +506,7 @@ export default function GamePage() {
           )}
         </ModalContent>
       </Modal>
-        <Modal isOpen={isModalVisible && currentStory != null} isDismissable={false}>
-          <ModalHeader>{currentStory?.title || `Level ${currentLevel}`}</ModalHeader>
-          <ModalBody>{currentStory?.body || 'No story available for this level.'}</ModalBody>
-        </Modal>
+
       <div>
         <canvas ref={canvasRef}></canvas>
       </div>
