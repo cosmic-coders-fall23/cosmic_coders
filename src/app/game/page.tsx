@@ -186,7 +186,7 @@ export default function GamePage() {
       ]);
     }
 
-    // Define a function to calculate spawn time based oncurrentLevel 
+    // Define a function to calculate spawn time based oncurrentLevel
     function calculateSpawnTime(currentLevel: number): number {
       // Use a formula that decreases time slowly and approaches a minimum value but never reaches 0
       // This is a logarithmic decrease. Adjust the divisor to control the rate of decrease
@@ -451,7 +451,9 @@ export default function GamePage() {
       gameActive = false;
       clearGameObjects();
       displayGameOverText();
-      processScore(score);
+      if (lives === 0) {
+        processScore(score);
+      }
       k.onKeyPress("enter", restartGame);
     }
 
@@ -501,7 +503,7 @@ export default function GamePage() {
     // Function to handle game completion
     function gameComplete() {
       displayGameCompleteText();
-      k.onKeyPress("enter", restartGame); 
+      k.onKeyPress("enter", restartGame);
     }
 
     // Function to display game completion text
