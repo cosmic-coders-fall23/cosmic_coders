@@ -149,17 +149,19 @@ function HomePage() {
                         <Image src="/sprites/starship.png"/>
                     </motion.div>
                 </motion.div>
-
             </div>
             <div className="h-screen text-right">
                 <motion.h1
                     initial={{opacity: 0, x: 100}}
                     whileInView={{opacity: 1, x: 0}}
-                    transition={{ease: "anticipate", duration: 0.5, delay: 0.2}}
+                    transition={{ease: "anticipate", duration: 0.5}}
                     className="text-5xl font-black"
                 >
                     Engaging Gameplay
                 </motion.h1>
+                <motion.div className="flex flex-row justify-end mt-8">
+                    <Image src="/videos/demo.gif" />
+                </motion.div>
             </div>
             <div className="h-screen">
                 <motion.h1
