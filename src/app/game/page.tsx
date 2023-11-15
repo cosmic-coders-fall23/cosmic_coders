@@ -398,7 +398,7 @@ export default function GamePage() {
     function startLevel() {
       showLevelModal(); // Show level start modal
       levelText.text = `Level: ${currentLevel}`;
-      k.wait(10, () => {
+      k.wait(20, () => {
         if (currentLevel <= MAX_LEVEL) {
           resetPlayerPosition();
           startLevelChallenges(); // Setup level-specific elements

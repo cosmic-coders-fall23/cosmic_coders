@@ -42,10 +42,14 @@ export default function LevelModal({level, isModalVisible, setModalVisible}: Sto
 
     return (
         <Modal className="modal-container" isOpen={isModalVisible} isDismissable={false}>
-            <ModalHeader className="font-pixel-emulator text-xl text-white crawl-text">{story?.title || `Level ${level}`}</ModalHeader>
-            <ModalBody className="font-pixel-emulator text-xl text-white crawl-text">
-                {story?.body || 'No story available for this level.'}
-            </ModalBody>
+            <div className="crawl-text">
+                <ModalHeader className="font-pixel-emulator text-xl text-white">
+                    {story?.title || `Level ${level}`}
+                </ModalHeader>
+                <ModalBody className="font-pixel-emulator text-xl text-white">
+                    {story?.body || 'No story available for this level.'}
+                </ModalBody>
+            </div>
         </Modal>
-    )
+    );
 }
