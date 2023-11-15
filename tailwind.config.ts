@@ -10,7 +10,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
-
+      fontFamily: {
+              'pixel-emulator': ['"PixelEmulator"'], // Use your font name
+            },
     },
   },
   darkMode: "class",

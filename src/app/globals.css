@@ -16,6 +16,11 @@
   }
 }
 
+@font-face {
+    font-family: 'PixelEmulator';
+    src: url('/fonts/PixelEmulator.ttf') format('truetype'); /* Update the path as necessary */
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -26,3 +31,17 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+@keyframes textCrawl {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+.crawl-text {
+  animation: textCrawl 10s linear infinite;
+  white-space: pre-wrap; /* Ensures text formatting is maintained */
+  overflow: hidden;
+}
